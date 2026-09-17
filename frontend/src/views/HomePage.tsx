@@ -1,8 +1,9 @@
 function HomePage() {
   return (
-    <section>
-      <p>Hello world !</p>
-    </section>
+    <main>
+      <h1>FastGame</h1>
+      <p>Bienvenue sur la page d'accueil.</p>
+    </main>
   );
 }
 
