@@ -1,0 +1,14 @@
+# Application
+fastapi
+uvicorn[standard]
+pydantic-settings
+sqlalchemy
+alembic
+python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
+
+# Development and tests
+pytest
+httpx
+ruff
