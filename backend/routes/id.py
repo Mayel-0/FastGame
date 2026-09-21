@@ -8,15 +8,15 @@ router = APIRouter(
     tags=["Jeux"]
 )
 
-@router.get("/{game_id}", response_model=GameSchema)
+@router.get("/id/{game_id}", response_model=GameSchema)
 def get_game_by_id(game_id: int, db: Session = Depends(get_db)):
-    """Récupère un jeu spécifique par son ID"""
+    """Récupère un jeu par son ID (ex: /api/jeux/id/4)"""
     game = db.query(GameModel).filter(GameModel.id == game_id).first()
-    
+
     if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Le jeu avec l'ID {game_id} n'existe pas."
+            detail=f"Aucun jeu trouvé avec l'ID {game_id}."
         )
         
     return game
