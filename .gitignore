@@ -92,3 +92,5 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+scrapper.ts
