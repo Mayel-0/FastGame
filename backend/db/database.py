@@ -1,23 +1,27 @@
 import os
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-# Charge les variables du fichier .env
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Création du moteur de connexion PostgreSQL (Supabase)
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL est manquante. Copie backend/.env.example vers backend/.env "
+        "et renseigne l'URL de connexion à la base."
+    )
+
 engine = create_engine(DATABASE_URL)
 
-# Création de la session pour communiquer avec la DB
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# Fonction utilitaire pour injecter la session dans tes routes FastAPI
 def get_db():
     db = SessionLocal()
     try:
