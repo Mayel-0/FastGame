@@ -1,0 +1,28 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from typing import List
+from db.database import get_db
+from models.game import GameModel, GameSchema
+
+router = APIRouter(
+    prefix="/api/jeux",
+    tags=["Jeux"]
+)
+
+@router.get("/studio/{studio}", response_model=List[GameSchema])
+def get_games_by_studio(studio: str, db: Session = Depends(get_db)):
+    """Récupère les jeux d'un studio (gère les espaces et la casse)"""
+    search_query = studio.replace(" ", "")
+    
+    games = db.query(GameModel).filter(
+        func.replace(GameModel.studio, ' ', '').ilike(f"%{search_query}%")
+    ).all()
+
+    if not games:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Aucun jeu trouvé pour le studio '{studio}'."
+        )
+        
+    return games
