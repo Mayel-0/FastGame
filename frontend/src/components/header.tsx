@@ -1,7 +1,17 @@
 function Header() {
   return(
-    <header>
-      <p>je suis le header</p>
+    <header className="header">
+      <h1 className="header__title">FastGame</h1>
+      <nav className="header__nav">
+        <li className="header__li"><a></a>acceuil</li>
+        <li className="header__li"><a></a>jeux</li>
+        <li className="header__li"><a></a>actualiter</li>
+        <li className="header__li"><a></a>Nouveautes</li>
+      </nav>
+      <div className="header__links">
+        <a>s'inscrire</a>
+        <a>connexion</a>
+      </div>
     </header>
   )
 }
