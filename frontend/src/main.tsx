@@ -5,6 +5,7 @@ import "./styles/main.scss"
 import { AuthProvider } from './context/AuthContext'
 
 
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>

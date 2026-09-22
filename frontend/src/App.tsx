@@ -4,6 +4,7 @@ import Header from './components/header';
 import Footer from './components/footer';
 import LoginPage from './views/LoginPage';
 import RegisterPage from './views/RegisterPage';
+import ProfilPage from './views/ProfilPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profil" element={<ProfilPage />} />
         {/*  <Route path="*" element={<Notfound />} /> */}
       </Routes>
       <Footer/>
