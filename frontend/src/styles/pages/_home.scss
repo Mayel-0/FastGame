@@ -1,0 +1,35 @@
+.home-page {
+	min-height: 70vh;
+	padding: 4rem clamp(1.25rem, 5vw, 5rem);
+	background: var(--color-page);
+
+	&__intro {
+		max-width: 48rem;
+		margin: 0 auto 3rem;
+		text-align: center;
+
+		h2 {
+			margin: 0;
+			font-family: var(--font-ui);
+			font-size: clamp(2.2rem, 6vw, 4.5rem);
+			line-height: 1;
+		}
+
+		& > p:last-child {
+			max-width: 34rem;
+			margin: 1.25rem auto 0;
+			color: var(--color-copy);
+			font-size: 1.05rem;
+		}
+	}
+
+	&__eyebrow {
+		margin: 0 0 .75rem;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .75rem;
+		font-weight: 700;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+	}
+}

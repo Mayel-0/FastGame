@@ -1,0 +1,19 @@
+.game-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+	gap: 1.5rem;
+	max-width: var(--content-width);
+	margin: 0 auto;
+
+	&__state {
+		max-width: var(--content-width);
+		margin: 2rem auto;
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		text-align: center;
+
+		&--error {
+			color: var(--color-danger);
+		}
+	}
+}
