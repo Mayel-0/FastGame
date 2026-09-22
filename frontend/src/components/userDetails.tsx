@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type Profil from "../models/profil";
 
 interface UserDetailsProps {
@@ -7,10 +6,7 @@ interface UserDetailsProps {
 }
 
 function UserDetails({profil, my_id}:UserDetailsProps) {
-  const [isMe, setIsMe] = useState<boolean>(false)
-  if (profil.id === my_id) {
-    setIsMe(true)
-  }
+  const isMe = profil.id === my_id;
   return (
     <section>
       {isMe && <p>mon profile</p>}
