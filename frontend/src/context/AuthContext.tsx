@@ -61,7 +61,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
+    const stored = sessionStorage.getItem(TOKEN_KEY);
     // On valide le token dès l'init — s'il est expiré on l'ignore
     return stored && isTokenValid(stored) ? stored : null;
   });
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── logout ───────────────────────────────────────────────────────────────
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
     if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
@@ -146,13 +146,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Token invalide ou expiré");
     }
 
-    localStorage.setItem(TOKEN_KEY, newToken);
+    sessionStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
     tokenRef.current = newToken;
 
     const profile = await fetchProfile(newToken);
     if (!profile) {
-      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
       setToken(null);
       tokenRef.current = null;
       throw new Error("Impossible de récupérer le profil");

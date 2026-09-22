@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, Field
 from datetime import datetime
 from db.database import Base
 
@@ -26,20 +26,20 @@ class UserSchema(BaseModel):
         from_attributes = True
 
 class UserCreateSchema(BaseModel):
-    email: str
-    password: str
-    username: str
-    bio: str | None = None
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=8, max_length=72)
+    username: str = Field(min_length=1, max_length=50)
+    bio: str | None = Field(default=None, max_length=500)
 
 class UserUpdateSchema(BaseModel):
-    email: str
-    username: str
-    bio: str | None = None
-    password: str | None = None
+    email: str = Field(min_length=3, max_length=320)
+    username: str = Field(min_length=1, max_length=50)
+    bio: str | None = Field(default=None, max_length=500)
+    password: str | None = Field(default=None, min_length=8, max_length=72)
 
 class UserLoginSchema(BaseModel):
-    email: str
-    password: str
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=1, max_length=72)
 
 class TokenSchema(BaseModel):
     access_token: str

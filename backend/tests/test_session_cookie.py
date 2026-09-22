@@ -1,7 +1,10 @@
 import os
 import unittest
 
-os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-local-tests")
+os.environ.setdefault(
+    "JWT_SECRET_KEY",
+    "test-secret-key-for-local-tests-that-is-long-enough-1234567890",
+)
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -15,7 +18,7 @@ from routes.users import get_db
 from utils.security import hash_password
 
 
-class SessionCookieAuthTests(unittest.TestCase):
+class JwtAuthTests(unittest.TestCase):
     def setUp(self):
         self.engine = create_engine(
             "sqlite://",
@@ -50,7 +53,7 @@ class SessionCookieAuthTests(unittest.TestCase):
     def tearDown(self):
         app.dependency_overrides.clear()
 
-    def test_login_sets_session_cookie_with_user_id_and_cookie_auth_works(self):
+    def test_login_returns_jwt_and_bearer_auth_works(self):
         client = TestClient(app)
 
         response = client.post(
@@ -60,16 +63,18 @@ class SessionCookieAuthTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200, response.text)
         self.assertIn("access_token", response.json())
-        self.assertIn("fastgame_session", response.cookies)
-        self.assertEqual(response.cookies["fastgame_session"], str(self.user_id))
+        token = response.json()["access_token"]
 
         profile_response = client.get(
             "/api/users/me",
-            cookies={"fastgame_session": str(self.user_id)},
+            headers={"Authorization": f"Bearer {token}"},
         )
 
         self.assertEqual(profile_response.status_code, 200, profile_response.text)
         self.assertEqual(profile_response.json()["email"], "alice@example.com")
+
+        without_token_response = client.get("/api/users/me")
+        self.assertEqual(without_token_response.status_code, 401)
 
 
 if __name__ == "__main__":

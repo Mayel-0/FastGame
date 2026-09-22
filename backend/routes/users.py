@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -10,8 +10,6 @@ from utils.security import (
     create_access_token,
     SECRET_KEY,
     ALGORITHM,
-    SESSION_COOKIE_NAME,
-    set_session_cookie,
 )
 
 router = APIRouter(
@@ -22,8 +20,8 @@ router = APIRouter(
 # Utilisation de HTTPBearer pour un champ de token simple et direct dans Swagger
 security = HTTPBearer(auto_error=False)
 
-# Fonction utilitaire pour récupérer l'utilisateur connecté grâce à son token ou à son cookie de session
-def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials | None = Depends(security), db: Session = Depends(get_db)):
+# Fonction utilitaire pour récupérer l'utilisateur connecté grâce à son token JWT
+def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Impossible de valider les identifiants",
@@ -31,9 +29,8 @@ def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials
     )
 
     if credentials is not None:
-        token = credentials.credentials
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
             email: str | None = payload.get("sub")
             if email is not None:
                 user = db.query(UserModel).filter(UserModel.email == email).first()
@@ -42,22 +39,13 @@ def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials
         except JWTError:
             pass
 
-    session_user_id = request.cookies.get(SESSION_COOKIE_NAME)
-    if session_user_id is not None:
-        try:
-            user_id = int(session_user_id)
-        except (TypeError, ValueError):
-            raise credentials_exception
-
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
-        if user is not None:
-            return user
-
     raise credentials_exception
 
 # 1. INSCRIPTION (POST) -> Hache le mot de passe
 @router.post("/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
+    user_data.email = user_data.email.strip().lower()
+    user_data.username = user_data.username.strip()
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé.")
 
@@ -76,15 +64,14 @@ def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# 2. CONNEXION (POST) -> Renvoie un Token JWT au Front-end et un cookie de session de 12h
+# 2. CONNEXION (POST) -> Renvoie un Token JWT au Front-end
 @router.post("/login", response_model=TokenSchema)
-def login_user(user_data: UserLoginSchema, response: Response, db: Session = Depends(get_db)):
-    user = db.query(UserModel).filter(UserModel.email == user_data.email).first()
+def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.email == user_data.email.strip().lower()).first()
     if not user or not verify_password(user_data.password, user.password):
-        raise HTTPException(status_code=400, detail="Email ou mot de passe incorrect.")
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect.", headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token(data={"sub": user.email})
-    set_session_cookie(response, user.id)
     return {"access_token": access_token, "token_type": "bearer"}
 
 # 3. GET MON PROFIL (Sécurisé)
@@ -97,8 +84,19 @@ def get_my_profile(current_user: UserModel = Depends(get_current_user)):
 @router.put("/me", response_model=UserSchema)
 def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     """Met à jour le profil de l'utilisateur connecté"""
-    current_user.email = user_data.email
-    current_user.username = user_data.username
+    email = user_data.email.strip().lower()
+    username = user_data.username.strip()
+
+    existing_email = db.query(UserModel).filter(UserModel.email == email, UserModel.id != current_user.id).first()
+    if existing_email:
+        raise HTTPException(status_code=409, detail="Cet email est déjà utilisé.")
+
+    existing_username = db.query(UserModel).filter(UserModel.username == username, UserModel.id != current_user.id).first()
+    if existing_username:
+        raise HTTPException(status_code=409, detail="Ce nom d'utilisateur est déjà pris.")
+
+    current_user.email = email
+    current_user.username = username
     current_user.bio = user_data.bio
     if user_data.password:
         current_user.password = hash_password(user_data.password)
