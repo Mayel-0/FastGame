@@ -1,6 +1,7 @@
 export default interface Profil {
   id: number;
-  username: Text;
-  bio: Text;
-  steam: boolean;
+  created_at: string | null;
+  email: string;
+  username: string;
+  bio: string | null;
 }

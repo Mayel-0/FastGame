@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type Profil from "../models/profil";
 
-const TOKEN_STORAGE_KEY = "fastgame_access_token"
-const API_URL = import.meta.env.VITE_API_URL
+const TOKEN_STORAGE_KEY = "fastgame_access_token";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 interface JwtPayload {
   sub?: string | number;
@@ -33,10 +33,9 @@ function decodeToken(token: string): JwtPayload | null {
   }
 }
 
-function getProfileId(token: string): string | null {
+function hasSubject(token: string): boolean {
   const payload = decodeToken(token);
-  const profileId = payload?.sub ?? payload?.id;
-  return profileId === undefined || profileId === null ? null : String(profileId);
+  return payload?.sub !== undefined && payload.sub !== null;
 }
 
 function isTokenExpired(token: string): boolean {
@@ -76,13 +75,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return null;
     }
 
-    const profileId = getProfileId(token);
-    if (!profileId) {
+    if (!hasSubject(token)) {
       logout();
       return null;
     }
 
-    const response = await authFetch(`${API_URL}/api/profil/${profileId}`);
+    const response = await authFetch(`${API_URL}/api/users/me`);
     if (!response.ok) {
       if (response.status !== 401) logout();
       return null;
@@ -94,15 +92,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [authFetch, logout, token]);
 
   const login = useCallback(async (newToken: string): Promise<Profil> => {
-    if (!newToken || isTokenExpired(newToken) || !getProfileId(newToken)) {
+    if (!newToken || isTokenExpired(newToken) || !hasSubject(newToken)) {
       throw new Error("Token d'authentification invalide ou expire");
     }
 
     localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
     setToken(newToken);
 
-    const profileId = getProfileId(newToken);
-    const response = await fetch(`${API_URL}/api/profil/${profileId}`, {
+    const response = await fetch(`${API_URL}/api/users/me`, {
       headers: { Authorization: `Bearer ${newToken}` },
     });
     if (!response.ok) {

@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
-from models.users import UserModel, UserSchema, UserCreateSchema, UserLoginSchema, TokenSchema
+from models.users import UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
 from utils.security import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 
 router = APIRouter(
@@ -29,7 +29,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-        
+
     user = db.query(UserModel).filter(UserModel.email == email).first()
     if user is None:
         raise credentials_exception
@@ -40,7 +40,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé.")
-    
+
     if db.query(UserModel).filter(UserModel.username == user_data.username).first():
         raise HTTPException(status_code=400, detail="Ce nom d'utilisateur est déjà pris.")
 
@@ -50,7 +50,7 @@ def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
         username=user_data.username,
         bio=user_data.bio
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -62,7 +62,7 @@ def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.email == user_data.email).first()
     if not user or not verify_password(user_data.password, user.password):
         raise HTTPException(status_code=400, detail="Email ou mot de passe incorrect.")
-    
+
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -74,7 +74,7 @@ def get_my_profile(current_user: UserModel = Depends(get_current_user)):
 
 # 4. MODIFIER MON PROFIL (Sécurisé)
 @router.put("/me", response_model=UserSchema)
-def update_my_profile(user_data: UserCreateSchema, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     """Met à jour le profil de l'utilisateur connecté"""
     current_user.email = user_data.email
     current_user.username = user_data.username

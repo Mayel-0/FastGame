@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.games import router as games_router
 from routes.id import router as game_id_router
 from routes.title import router as game_title_router
-from routes.studio import router as studio_router   
+from routes.studio import router as studio_router
 from routes.plateforme import router as plateforme_router
 from routes.annee import router as annee_router
 from routes.genre import router as genre_router
@@ -14,9 +14,8 @@ app = FastAPI(title="FastGame API", version="1.0")
 
 # 1. Définir les origines autorisées (les domaines qui ont le droit d'appeler ton API)
 origins = [
-    "http://localhost:3000",  # Port classique pour React / Vite en local
-    "http://localhost:5173",  # Autre port fréquent pour Vite
-    "*"                       # Autorise toutes les origines (pratique pour le développement)
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 # 2. Ajouter le middleware CORS à l'application

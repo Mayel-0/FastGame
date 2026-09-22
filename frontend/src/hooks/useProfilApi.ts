@@ -1,6 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 
-const BASE = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/profil`;
+const BASE = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/users`;
 
 type ApiBody = Record<string, unknown>;
 
@@ -37,9 +37,9 @@ export function useProfilApi() {
     }).then((res) => handleResponse<T>(res));
   };
 
-  const patch = <T = unknown>(path: string, body: ApiBody) =>
+  const put = <T = unknown>(path: string, body: ApiBody) =>
     authFetch(`${BASE}${path}`, {
-      method: "PATCH",
+      method: "PUT",
       headers,
       credentials: "include",
       body: JSON.stringify(body),
@@ -60,7 +60,7 @@ export function useProfilApi() {
       credentials: "include",
     }).then((res) => handleResponse<T>(res));
 
-  return { get, patch, post, del };
+  return { get, put, post, del };
 }
 
 export { useProfilApi as useApi };

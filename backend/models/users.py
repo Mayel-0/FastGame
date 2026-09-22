@@ -31,6 +31,12 @@ class UserCreateSchema(BaseModel):
     username: str
     bio: str | None = None
 
+class UserUpdateSchema(BaseModel):
+    email: str
+    username: str
+    bio: str | None = None
+    password: str | None = None
+
 class UserLoginSchema(BaseModel):
     email: str
     password: str
