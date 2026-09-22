@@ -20,3 +20,6 @@ class LikeSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class LikeCreateSchema(BaseModel):
+    game_id: int

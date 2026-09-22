@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
-from models.users import UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
+from models.users import PublicUserSchema, UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
 from utils.security import (
     hash_password,
     verify_password,
@@ -79,6 +79,13 @@ def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
 def get_my_profile(current_user: UserModel = Depends(get_current_user)):
     """Récupère uniquement les infos de l'utilisateur connecté via son token"""
     return current_user
+
+@router.get("/{user_id}", response_model=PublicUserSchema)
+def get_user_by_id(user_id: int, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+    return user
 
 # 4. MODIFIER MON PROFIL (Sécurisé)
 @router.put("/me", response_model=UserSchema)
