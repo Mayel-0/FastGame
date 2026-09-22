@@ -1,10 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
 from models.users import UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
-from utils.security import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from utils.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    SECRET_KEY,
+    ALGORITHM,
+    SESSION_COOKIE_NAME,
+    set_session_cookie,
+)
 
 router = APIRouter(
     prefix="/api/users",
@@ -12,28 +20,40 @@ router = APIRouter(
 )
 
 # Utilisation de HTTPBearer pour un champ de token simple et direct dans Swagger
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
-# Fonction utilitaire pour récupérer l'utilisateur connecté grâce à son token
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
-    token = credentials.credentials
+# Fonction utilitaire pour récupérer l'utilisateur connecté grâce à son token ou à son cookie de session
+def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials | None = Depends(security), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Impossible de valider les identifiants",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
 
-    user = db.query(UserModel).filter(UserModel.email == email).first()
-    if user is None:
-        raise credentials_exception
-    return user
+    if credentials is not None:
+        token = credentials.credentials
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            email: str | None = payload.get("sub")
+            if email is not None:
+                user = db.query(UserModel).filter(UserModel.email == email).first()
+                if user is not None:
+                    return user
+        except JWTError:
+            pass
+
+    session_user_id = request.cookies.get(SESSION_COOKIE_NAME)
+    if session_user_id is not None:
+        try:
+            user_id = int(session_user_id)
+        except (TypeError, ValueError):
+            raise credentials_exception
+
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if user is not None:
+            return user
+
+    raise credentials_exception
 
 # 1. INSCRIPTION (POST) -> Hache le mot de passe
 @router.post("/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
@@ -56,14 +76,15 @@ def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# 2. CONNEXION (POST) -> Renvoie un Token JWT au Front-end
+# 2. CONNEXION (POST) -> Renvoie un Token JWT au Front-end et un cookie de session de 12h
 @router.post("/login", response_model=TokenSchema)
-def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
+def login_user(user_data: UserLoginSchema, response: Response, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.email == user_data.email).first()
     if not user or not verify_password(user_data.password, user.password):
         raise HTTPException(status_code=400, detail="Email ou mot de passe incorrect.")
 
     access_token = create_access_token(data={"sub": user.email})
+    set_session_cookie(response, user.id)
     return {"access_token": access_token, "token_type": "bearer"}
 
 # 3. GET MON PROFIL (Sécurisé)

@@ -13,6 +13,22 @@ if not SECRET_KEY:
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # Le token expire au bout de 24h
+SESSION_COOKIE_NAME = "fastgame_session"
+SESSION_COOKIE_TTL_SECONDS = 12 * 60 * 60
+
+
+def set_session_cookie(response, user_id: int):
+    expires = datetime.now(timezone.utc) + timedelta(seconds=SESSION_COOKIE_TTL_SECONDS)
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=str(user_id),
+        max_age=SESSION_COOKIE_TTL_SECONDS,
+        expires=expires,
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=False,
+    )
 
 def hash_password(password: str):
     # On encode en bytes et on gère la limite de bcrypt (72 octets max)
