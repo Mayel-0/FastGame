@@ -1,17 +1,24 @@
 import UserDetails from "../components/userDetails";
 import { useAuth } from "../context/AuthContext";
 import useUserById from "../hooks/useUserById";
+import PageLoader from "../components/pageLoader";
 
 function ProfilPage() {
-  const { user: currentUser } = useAuth();
-  const { user } = useUserById(currentUser?.id ?? null);
+  const { user: currentUser, isLoading: loadingCurrentUser } = useAuth();
+  const { user, loading: loadingUser } = useUserById(currentUser?.id ?? null);
 
-  if (!user || !currentUser) return <main><p>chargement</p></main>;
+  const isLoading = [loadingCurrentUser, loadingUser].some(Boolean);
 
   return (
-    <main>
-      <UserDetails profil={user} my_id={currentUser.id}/>
-    </main>
+    <PageLoader loading={isLoading}>
+      {!isLoading && (!currentUser || !user) ? (
+        <main className="profile-details">
+          <p role="alert">Profil introuvable.</p>
+        </main>
+      ) : !isLoading && currentUser && user ? (
+        <UserDetails profil={user} currentUser={currentUser} />
+      ) : null}
+    </PageLoader>
   );
 }
 

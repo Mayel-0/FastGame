@@ -1,8 +1,27 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ProfileDrawer from "./ProfileDrawer";
 
 function Header() {
   const { isAuthenticated } = useAuth();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsProfileMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", closeWithEscape);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", closeWithEscape);
+      document.body.style.overflow = "";
+    };
+  }, [isProfileMenuOpen]);
 
   return (
     <header className="header">
@@ -25,10 +44,19 @@ function Header() {
           </div>
         ) : (
           <div className="header__action-group">
-            <Link className="header__action header__action--primary" to="/profil">profil</Link>
+            <button
+              className="header__action header__action--primary"
+              type="button"
+              onClick={() => setIsProfileMenuOpen(true)}
+              aria-expanded={isProfileMenuOpen}
+              aria-controls="profile-drawer"
+            >
+              profil
+            </button>
           </div>
         )}
       </div>
+      {isAuthenticated && <ProfileDrawer isOpen={isProfileMenuOpen} onClose={() => setIsProfileMenuOpen(false)} />}
     </header>
   );
 }

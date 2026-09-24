@@ -10,6 +10,18 @@ router = APIRouter(
     tags=["Likes"]
 )
 
+@router.get("/{game_id}")
+def get_like_status(
+    game_id: int,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    like = db.query(LikeModel).filter(
+        LikeModel.user_id == current_user.id,
+        LikeModel.post_id == game_id,
+    ).first()
+    return {"liked": like is not None}
+
 # 1. AJOUTER UN LIKE (POST)
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_like(

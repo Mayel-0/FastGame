@@ -6,7 +6,9 @@ const useAllGame = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/jeux/`)
+    fetch(
+      `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/jeux/`,
+    )
       .then((res) => {
         if (!res.ok) throw Error("Erreur recuperation des jeux");
         return res.json();
