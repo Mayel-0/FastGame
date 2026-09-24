@@ -41,8 +41,8 @@ class UserCreateSchema(BaseModel):
     bio: str | None = Field(default=None, max_length=500)
 
 class UserUpdateSchema(BaseModel):
-    email: str = Field(min_length=3, max_length=320)
-    username: str = Field(min_length=1, max_length=50)
+    email: str | None = Field(default=None, min_length=3, max_length=320)
+    username: str | None = Field(default=None, min_length=1, max_length=50)
     bio: str | None = Field(default=None, max_length=500)
     password: str | None = Field(default=None, min_length=8, max_length=72)
 

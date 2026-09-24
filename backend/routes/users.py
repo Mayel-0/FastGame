@@ -88,24 +88,27 @@ def get_user_by_id(user_id: int, current_user: UserModel = Depends(get_current_u
     return user
 
 # 4. MODIFIER MON PROFIL (Sécurisé)
-@router.put("/me", response_model=UserSchema)
+@router.patch("/me", response_model=UserSchema)
 def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     """Met à jour le profil de l'utilisateur connecté"""
-    email = user_data.email.strip().lower()
-    username = user_data.username.strip()
+    if "email" in user_data.model_fields_set and user_data.email is not None:
+        email = user_data.email.strip().lower()
+        existing_email = db.query(UserModel).filter(UserModel.email == email, UserModel.id != current_user.id).first()
+        if existing_email:
+            raise HTTPException(status_code=409, detail="Cet email est déjà utilisé.")
+        current_user.email = email
 
-    existing_email = db.query(UserModel).filter(UserModel.email == email, UserModel.id != current_user.id).first()
-    if existing_email:
-        raise HTTPException(status_code=409, detail="Cet email est déjà utilisé.")
+    if "username" in user_data.model_fields_set and user_data.username is not None:
+        username = user_data.username.strip()
+        existing_username = db.query(UserModel).filter(UserModel.username == username, UserModel.id != current_user.id).first()
+        if existing_username:
+            raise HTTPException(status_code=409, detail="Ce nom d'utilisateur est déjà pris.")
+        current_user.username = username
 
-    existing_username = db.query(UserModel).filter(UserModel.username == username, UserModel.id != current_user.id).first()
-    if existing_username:
-        raise HTTPException(status_code=409, detail="Ce nom d'utilisateur est déjà pris.")
+    if "bio" in user_data.model_fields_set:
+        current_user.bio = user_data.bio
 
-    current_user.email = email
-    current_user.username = username
-    current_user.bio = user_data.bio
-    if user_data.password:
+    if "password" in user_data.model_fields_set and user_data.password:
         current_user.password = hash_password(user_data.password)
 
     db.commit()
