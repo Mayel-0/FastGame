@@ -61,3 +61,27 @@ def remove_like(
     db.delete(like)
     db.commit()
     return None
+
+# 3. OBTENIR TOUS LES LIKES DE L'UTILISATEUR CONNECTÉ (GET)
+@router.get("/me")
+def get_my_likes(
+    current_user: UserModel = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """Récupère la liste de tous les likes de l'utilisateur connecté via son token"""
+    likes = db.query(LikeModel).filter(LikeModel.user_id == current_user.id).all()
+    return likes
+
+# 4. OBTENIR LES LIKES D'UN JEU SPÉCIFIQUE (GET)
+@router.get("/game/{game_id}")
+def get_game_likes(
+    game_id: int, 
+    db: Session = Depends(get_db)
+):
+    """Permet de récupérer le nombre total de likes et la liste pour un jeu donné"""
+    likes = db.query(LikeModel).filter(LikeModel.game_id == game_id).all()
+    return {
+        "game_id": game_id,
+        "total_likes": len(likes),
+        "likes": likes
+    }
