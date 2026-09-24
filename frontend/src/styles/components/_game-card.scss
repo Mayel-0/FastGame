@@ -1,0 +1,109 @@
+.game-card {
+	overflow: hidden;
+	border: 1px solid var(--color-line);
+	background: var(--color-paper);
+	box-shadow: 6px 6px 0 var(--color-teal-soft);
+	transition: transform .2s ease, box-shadow .2s ease;
+
+	&:hover {
+		transform: translateY(-4px);
+		box-shadow: 8px 10px 0 #b8caca;
+	}
+
+	&__media {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: var(--color-teal-pale);
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__placeholder {
+		display: grid;
+		place-items: center;
+		height: 100%;
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: 2rem;
+		font-weight: 800;
+		letter-spacing: .08em;
+	}
+
+	&__genre {
+		position: absolute;
+		bottom: .8rem;
+		left: .8rem;
+		padding: .35rem .55rem;
+		background: var(--color-coral);
+		color: var(--color-paper);
+		font-family: var(--font-ui);
+		font-size: .7rem;
+		font-weight: 700;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+	}
+
+	&__body {
+		padding: 1.25rem;
+	}
+
+	&__year {
+		margin: 0 0 .35rem;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .8rem;
+		font-weight: 700;
+	}
+
+	h3 {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: 1.35rem;
+		line-height: 1.15;
+	}
+
+	&__details {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: .75rem;
+		margin: 1.25rem 0;
+
+		div {
+			min-width: 0;
+		}
+
+		dt {
+			color: var(--color-muted);
+			font-family: var(--font-ui);
+			font-size: .7rem;
+			font-weight: 700;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+		}
+
+		dd {
+			overflow: hidden;
+			margin: .25rem 0 0;
+			font-family: var(--font-ui);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__link {
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-weight: 700;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}

@@ -25,6 +25,15 @@ class UserSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class PublicUserSchema(BaseModel):
+    id: int
+    created_at: datetime | None = None
+    username: str
+    bio: str | None = None
+
+    class Config:
+        from_attributes = True
+
 class UserCreateSchema(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=8, max_length=72)

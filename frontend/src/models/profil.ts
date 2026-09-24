@@ -1,7 +1,7 @@
 export default interface Profil {
   id: number;
-  created_at: string | null;
-  email: string;
+  created_at?: string | null;
+  email?: string;
   username: string;
   bio: string | null;
 }
