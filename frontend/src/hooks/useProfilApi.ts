@@ -9,9 +9,9 @@ const useLikesByUser = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user) return;
 
-    authFetch(`${import.meta.env.VITE_API_URL}/api/likes/user/${user.id}`)
+    authFetch(`${import.meta.env.VITE_API_URL}/api/likes/me`)
       .then((res) => {
         if (!res.ok) throw Error("Erreur récupération des likes");
         return res.json();
