@@ -3,9 +3,14 @@
 @use './base/base';
 @use './components/header';
 @use './components/footer';
+@use './components/profile-drawer';
 @use './components/auth';
 @use './components/game-list';
 @use './components/game-card';
+@use './components/game-like';
+@use './pages/jeux';
 @use './pages/home';
 @use './pages/not-found';
+@use './pages/profile';
 @use './utilities/utilities';
+@use './components/pageLoader';

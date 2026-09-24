@@ -1,4 +1,6 @@
 import type Game from "../models/game";
+import GameLikeButton from "./GameLikeButton";
+
 
 interface GameListProps {
   games: Game[];
@@ -31,6 +33,7 @@ function GameList({games}:GameListProps) {
                 Voir la fiche <span aria-hidden="true">↗</span>
               </a>
             )}
+            <GameLikeButton gameId={game.id} />
           </div>
         </article>
       ))}

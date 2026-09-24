@@ -10,8 +10,6 @@ function Footer() {
         </div>
         <nav className="footer__navigation" aria-label="Navigation secondaire">
           <Link className="footer__link" to="/">Accueil</Link>
-          <Link className="footer__link" to="/register">Creer un compte</Link>
-          <Link className="footer__link" to="/login">Se connecter</Link>
         </nav>
       </div>
       <div className="footer__bottom">
