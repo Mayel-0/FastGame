@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "react-router-dom";
 import type Game from "../models/game";
+import GameDetailsCard from "../components/gameDetailsCard";
 
 function PageDetailsgame() {
   const { slug } = useParams();
@@ -14,15 +15,7 @@ function PageDetailsgame() {
 
   return (
   <main>
-    <div className="game-card__media">
-      {game.image ? (
-        <img src={game.image} alt={`Pochette de ${game.titre}`} loading="lazy" />
-      ) : (
-        <div className="game-card__placeholder" aria-hidden="true">FG</div>
-      )}
-      <span className="game-card__genre">{game.genre || "Jeu"}</span>
-    </div>
-    <h2>{game?.titre}</h2>
+    <GameDetailsCard game={game} />
   </main>
 );
 }
