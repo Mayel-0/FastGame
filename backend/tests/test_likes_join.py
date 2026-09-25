@@ -108,6 +108,43 @@ class LikesRouteTests(unittest.TestCase):
         self.assertEqual(response.json()["note"], 4.5)
         self.assertEqual(response.json()["note_moyenne"], 4.5)
 
+    def test_get_game_notes_returns_all_user_notes(self):
+        db = self.SessionLocal()
+        second_user = UserModel(
+            email="bob@example.com",
+            password=hash_password("secret123"),
+            username="bob",
+            bio="second user",
+        )
+        db.add(second_user)
+        db.commit()
+        db.refresh(second_user)
+        db.add_all([
+            NoteModel(id_game=123, id_user=self.user_id, value=5, body="Excellent jeu"),
+            NoteModel(id_game=123, id_user=second_user.id, value=3, body="Très bon"),
+        ])
+        db.commit()
+        db.close()
+
+        client = TestClient(app, base_url="http://localhost")
+        login_response = client.post(
+            "/api/users/login",
+            json={"email": "alice@example.com", "password": "secret123"},
+        )
+        token = login_response.json()["access_token"]
+
+        response = client.get(
+            "/api/notes/game/123",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.text)
+        payload = response.json()
+        self.assertEqual(payload["average_note"], 4.0)
+        self.assertEqual(len(payload["notes"]), 2)
+        self.assertEqual(payload["notes"][0]["username"], "alice")
+        self.assertEqual(payload["notes"][0]["value"], 5)
+
 
 if __name__ == "__main__":
     unittest.main()

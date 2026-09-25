@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -8,6 +10,7 @@ from models.game import GameModel, GameSchema
 from models.notes import NoteModel
 from models.users import UserModel
 from routes.users import get_current_user
+from utils.security import ALGORITHM, SECRET_KEY
 
 
 class NoteCreateSchema(BaseModel):
@@ -19,6 +22,24 @@ router = APIRouter(
     prefix="/api/notes",
     tags=["Notes"],
 )
+security = HTTPBearer(auto_error=False)
+
+
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: Session = Depends(get_db),
+):
+    if credentials is None:
+        return None
+
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if email is None:
+            return None
+        return db.query(UserModel).filter(UserModel.email == email).first()
+    except JWTError:
+        return None
 
 
 def attach_game_notes(db: Session, games: list[GameModel]) -> list[GameModel]:
@@ -46,26 +67,63 @@ def attach_game_notes(db: Session, games: list[GameModel]) -> list[GameModel]:
     return games
 
 
-@router.get("/game/{game_id}", response_model=GameSchema)
-def get_game_note(game_id: int, db: Session = Depends(get_db)):
-    game = (
-        db.query(GameModel, func.avg(NoteModel.value).label("note_moyenne"))
-        .outerjoin(NoteModel, NoteModel.id_game == GameModel.id)
-        .filter(GameModel.id == game_id)
-        .group_by(GameModel.id)
-        .first()
-    )
-
+@router.get("/game/{game_id}")
+def get_game_note(
+    game_id: int,
+    current_user: UserModel | None = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+):
+    game = db.query(GameModel).filter(GameModel.id == game_id).first()
     if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Aucun jeu trouvé avec l'ID {game_id}.",
         )
 
-    game_model, note_average = game
-    game_model.note = round(float(note_average), 2) if note_average is not None else None
-    game_model.note_moyenne = game_model.note
-    return game_model
+    notes_query = (
+        db.query(NoteModel, UserModel.username)
+        .join(UserModel, UserModel.id == NoteModel.id_user)
+        .filter(NoteModel.id_game == game_id)
+        .order_by(NoteModel.id.desc())
+        .all()
+    )
+
+    notes = [
+        {
+            "id": note.id,
+            "id_game": note.id_game,
+            "id_user": note.id_user,
+            "username": username,
+            "value": note.value,
+            "body": note.body,
+        }
+        for note, username in notes_query
+    ]
+
+    if current_user is not None:
+        notes.sort(key=lambda item: (item["id_user"] != current_user.id, -item["id"]))
+    else:
+        notes.sort(key=lambda item: item["id"], reverse=True)
+
+    average_note = round(
+        sum(item["value"] for item in notes) / len(notes),
+        2,
+    ) if notes else None
+
+    user_note = None
+    if current_user is not None:
+        user_note = next(
+            (item for item in notes if item["id_user"] == current_user.id),
+            None,
+        )
+
+    enriched_game = attach_game_notes(db, [game])[0]
+    return {
+        "game": enriched_game,
+        "average_note": average_note,
+        "notes": notes,
+        "user_note": user_note,
+    }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

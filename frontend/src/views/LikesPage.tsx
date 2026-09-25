@@ -5,7 +5,7 @@ import useLikesByUser from "../hooks/useProfilApi";
 import useLikeStatus from "../hooks/useLikeStatus";
 
 function LikesPages() {
-  const { games: games, loading: loadingGames, error } = useLikesByUser();
+  const { games, loading: loadingGames } = useLikesByUser();
   const { isLoading: loadingUser} = useAuth();
   const gameIds = games.map((g) => g.id);
   const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);

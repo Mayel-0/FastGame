@@ -1,0 +1,29 @@
+.details-page {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 3rem clamp(1.25rem, 4vw, 2.5rem) 5rem;
+
+  &__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: center;
+  }
+
+  &__state {
+    max-width: 36rem;
+    margin: 4rem auto;
+    padding: 2rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-copy);
+    font-family: var(--font-ui);
+    text-align: center;
+  }
+
+  @media (max-width: 780px) {
+    &__header {
+      grid-template-columns: 1fr;
+    }
+  }
+}
