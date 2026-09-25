@@ -4,14 +4,17 @@ import GameList from "../components/gameList";
 import { useAuth } from "../context/AuthContext";
 import PageLoader from "../components/pageLoader";
 import useAllGame from "../hooks/useAllGame";
+import useLikeStatus from "../hooks/useLikeStatus";
 
 function HomePage() {
   const { AllGames: games, loading: loadingGames, error } = useAllGame();
   const { isLoading: loadingUser} = useAuth();
+  const gameIds = games.map((g) => g.id);
+  const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);
   const [search, setSearch] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("Tous");
 
-  const isLoading = [loadingGames,loadingUser].some(Boolean)
+  const isLoading = [loadingGames,loadingUser,loadingLikes].some(Boolean)
 
   const genres = useMemo(() => {
     const values = games
@@ -79,7 +82,7 @@ function HomePage() {
           {!error && filteredGames.length === 0 && (
             <p className="game-list__state">Aucun jeu ne correspond à votre recherche.</p>
           )}
-          {!error && filteredGames.length > 0 && <GameList games={filteredGames} />}
+          {!error && filteredGames.length > 0 && <GameList onToggleLike={toggleLike} likes={likes} games={filteredGames} />}
         </section>
       </div>
     </PageLoader>

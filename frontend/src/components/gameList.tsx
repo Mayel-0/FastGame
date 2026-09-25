@@ -1,12 +1,17 @@
 import type Game from "../models/game";
 import GameLikeButton from "./GameLikeButton";
+import { Link } from "react-router-dom";
+import { toSlug } from "../utils/slug";
 
 
 interface GameListProps {
   games: Game[];
+  likes: Record<number, boolean>;
+  onToggleLike: (gameId: number) => Promise<void>;
 }
 
-function GameList({games}:GameListProps) {
+
+function GameList({games, likes, onToggleLike}:GameListProps) {
   return (
     <section className="game-list" aria-label="Liste des jeux">
       {games.map((game) => (
@@ -28,12 +33,14 @@ function GameList({games}:GameListProps) {
               <div><dt>Studio</dt><dd>{game.studio || "Non renseigné"}</dd></div>
               <div><dt>Plateforme</dt><dd>{game.plateforme || "Non renseignée"}</dd></div>
             </dl>
-            {game.url && (
-              <a className="game-card__link" href={game.url} target="_blank" rel="noreferrer">
-                Voir la fiche <span aria-hidden="true">↗</span>
-              </a>
-            )}
-            <GameLikeButton gameId={game.id} />
+            <Link to={`/jeux/d/${toSlug(game.titre ?? "")}`} state={{ game }}>
+              Voir la fiche
+            </Link>
+             <GameLikeButton
+              gameId={game.id}
+              liked={likes[game.id] ?? false}
+              onToggle={onToggleLike}
+            />
           </div>
         </article>
       ))}

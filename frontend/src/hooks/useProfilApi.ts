@@ -1,27 +1,49 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import type Like from "../models/likes";
+import type Game from "../models/game";
+import type LikeWithGame from "../models/likes";
 
 const useLikesByUser = () => {
-  const { user, authFetch } = useAuth();
-  const [likes, setLikes] = useState<Like[]>([]);
+  const { authFetch } = useAuth();
+  const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-
     authFetch(`${import.meta.env.VITE_API_URL}/api/likes/me`)
       .then((res) => {
         if (!res.ok) throw Error("Erreur récupération des likes");
         return res.json();
       })
-      .then(setLikes)
+      .then((data: LikeWithGame[]) =>
+        data.map(
+          ({
+            game_id,
+            titre,
+            studio,
+            plateforme,
+            annee,
+            genre,
+            image,
+            url,
+          }) => ({
+            id: game_id,
+            titre,
+            studio,
+            plateforme,
+            annee,
+            genre,
+            image,
+            url,
+          }),
+        ),
+      )
+      .then(setGames)
       .catch(setError)
       .finally(() => setLoading(false));
-  }, [user?.id]);
+  }, []);
 
-  return { likes, loading, error };
+  return { games, loading, error };
 };
 
 export default useLikesByUser;

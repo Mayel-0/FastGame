@@ -2,16 +2,19 @@ import PageLoader from "../components/pageLoader";
 import GameList from "../components/gameList";
 import { useAuth } from "../context/AuthContext";
 import useLikesByUser from "../hooks/useProfilApi";
+import useLikeStatus from "../hooks/useLikeStatus";
 
 function LikesPages() {
-  const { likes: likes, loading: loadingGames, error } = useLikesByUser();
+  const { games: games, loading: loadingGames, error } = useLikesByUser();
   const { isLoading: loadingUser} = useAuth();
+  const gameIds = games.map((g) => g.id);
+  const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);
 
-  const isLoading = [loadingGames, loadingUser].some(Boolean)
+  const isLoading = [loadingGames, loadingUser, loadingLikes].some(Boolean)
   return(
   <main>
     <PageLoader loading={isLoading} >
-      <GameList games={likes}/>
+      <GameList onToggleLike={toggleLike} likes={likes} games={games}/>
     </PageLoader>
   </main>
   )

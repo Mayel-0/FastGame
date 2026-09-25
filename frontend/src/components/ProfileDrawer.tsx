@@ -1,5 +1,6 @@
 import { Heart, Star, UserRound, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 interface ProfileDrawerProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface ProfileDrawerProps {
 }
 
 function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
+  const { user } = useAuth();
   return (
     <>
       <div
@@ -23,7 +25,7 @@ function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
         <div className="profile-drawer__header">
           <div>
             <p className="profile-drawer__eyebrow">Espace personnel</p>
-            <h2>Mon compte</h2>
+            <h2>{user?.username}</h2>
           </div>
           <button className="profile-drawer__close" type="button" onClick={onClose} aria-label="Fermer le menu du profil">
             <X size={20} aria-hidden="true" />

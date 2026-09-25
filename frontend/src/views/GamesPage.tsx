@@ -2,12 +2,15 @@ import GameList from "../components/gameList";
 import useAllGame from "../hooks/useAllGame";
 import PageLoader from "../components/pageLoader";
 import { useAuth } from "../context/AuthContext";
+import useLikeStatus from "../hooks/useLikeStatus";
 
 function GamesPage() {
   const { AllGames: games, loading: loadingGames, error } = useAllGame();
   const { isLoading: loadingUser} = useAuth();
+  const gameIds = games.map((g) => g.id);
+  const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);
 
-  const isLoading = [loadingGames, loadingUser].some(Boolean)
+  const isLoading = [loadingGames, loadingUser, loadingLikes].some(Boolean)
 
   return (
     <div className="games-page">
@@ -23,7 +26,7 @@ function GamesPage() {
         {error ? (
           <p className="game-list__state game-list__state--error" role="alert">{error}</p>
         ) : (
-          <GameList games={games} />
+          <GameList games={games} likes={likes} onToggleLike={toggleLike}/>
         )}
       </PageLoader>
     </div>
