@@ -14,6 +14,7 @@ from main import app
 from db.database import Base
 from models.game import GameModel
 from models.likes import LikeModel
+from models.notes import NoteModel
 from models.users import UserModel
 from routes.users import get_db
 from utils.security import hash_password
@@ -90,6 +91,22 @@ class LikesRouteTests(unittest.TestCase):
         self.assertEqual(len(payload), 1)
         self.assertEqual(payload[0]["game_id"], 123)
         self.assertEqual(payload[0]["titre"], "Portal 2")
+
+    def test_get_game_by_id_returns_average_note_from_notes_table(self):
+        db = self.SessionLocal()
+        db.add_all([
+            NoteModel(id_game=123, id_user=self.user_id, value=5),
+            NoteModel(id_game=123, id_user=self.user_id + 1, value=4),
+        ])
+        db.commit()
+        db.close()
+
+        client = TestClient(app, base_url="http://localhost")
+        response = client.get("/api/jeux/id/123")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["note"], 4.5)
+        self.assertEqual(response.json()["note_moyenne"], 4.5)
 
 
 if __name__ == "__main__":

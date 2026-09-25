@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String
 from pydantic import BaseModel
 from db.database import Base
 
+
 # Modèle SQLAlchemy (pour la base de données)
 class GameModel(Base):
     __tablename__ = "jeux"
@@ -15,6 +16,7 @@ class GameModel(Base):
     image = Column(String)
     url = Column(String)
 
+
 # Schéma Pydantic (pour valider et formater la réponse de l'API)
 class GameSchema(BaseModel):
     id: int
@@ -25,6 +27,8 @@ class GameSchema(BaseModel):
     genre: str | None = None
     image: str | None = None
     url: str | None = None
+    note: float | None = None
+    note_moyenne: float | None = None
 
     class Config:
         from_attributes = True
