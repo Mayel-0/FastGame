@@ -11,6 +11,7 @@ from routes.plateforme import router as plateforme_router
 from routes.annee import router as annee_router
 from routes.genre import router as genre_router
 from routes.likes import router as likes_router
+from routes.notes import router as notes_router
 from routes.users import router as users_router
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
@@ -64,6 +65,7 @@ app.include_router(plateforme_router)
 app.include_router(annee_router)
 app.include_router(genre_router)
 app.include_router(likes_router)
+app.include_router(notes_router)
 app.include_router(users_router)
 
 @app.get("/")

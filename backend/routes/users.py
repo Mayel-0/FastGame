@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
+from models.notes import NoteModel
 from models.users import PublicUserSchema, UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
 from utils.security import (
     hash_password,
@@ -86,6 +87,34 @@ def get_user_by_id(user_id: int, current_user: UserModel = Depends(get_current_u
     if user is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
     return user
+
+@router.get("/{user_id}/notes")
+def get_user_with_notes(user_id: int, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    notes = db.query(NoteModel).filter(NoteModel.id_user == user_id).all()
+
+    return {
+        "user": {
+            "id": user.id,
+            "created_at": user.created_at,
+            "email": user.email,
+            "username": user.username,
+            "bio": user.bio,
+        },
+        "notes": [
+            {
+                "id": note.id,
+                "id_game": note.id_game,
+                "id_user": note.id_user,
+                "value": note.value,
+                "body": note.body,
+            }
+            for note in notes
+        ],
+    }
 
 # 4. MODIFIER MON PROFIL (Sécurisé)
 @router.patch("/me", response_model=UserSchema)
