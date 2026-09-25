@@ -20,7 +20,7 @@ function GameDetailsCard({game}:CardProps) {
       <div>
         <h3>{game?.studio}</h3>
         <p>{game?.plateforme}</p>
-        
+        <p>{game?.annee}</p>
       </div>
     </section>
   );
