@@ -21,9 +21,9 @@ function ListesList({ listes, updateList }: ListesListProps) {
         <article className="Listes__card">
           <Heart className="Listes__icon" size={20} aria-hidden="true" />
           <h3>Likes</h3>
-          <button>
+          <button type="button">
             <LockOpen className="Listes__icon" size={20} aria-hidden="true" />
-            <label>Public</label>
+            <span>Public</span>
           </button>
         </article>
       </Link>
@@ -32,30 +32,29 @@ function ListesList({ listes, updateList }: ListesListProps) {
         <article className="Listes__card">
           <Star className="Listes__icon" size={20} aria-hidden="true" />
           <h3>Favoris</h3>
-          <button>
+          <button type="button">
             <Lock className="Listes__icon" size={20} aria-hidden="true" />
-            <label>Privé</label>
+            <span>Privé</span>
           </button>
         </article>
       </Link>
 
       {listes.map((items) => (
-        <Link to={`/listes/${items.liste_title}`}>
-          <article className="Listes__card" key={items.id}>
+        <Link key={items.id} to={`/listes/${items.liste_title}`}>
+          <article className="Listes__card">
             <Folder className="Listes__icon" size={20} aria-hidden="true" />
             <h3>{items.liste_title}</h3>
 
-            {/* Bouton pour basculer le statut public/privé */}
             <button type="button" onClick={() => handleTogglePublic(items)}>
               {items.public ? (
                 <>
                   <LockOpen className="Listes__icon" size={20} aria-hidden="true" />
-                  <label>Public</label>
+                  <span>Public</span>
                 </>
               ) : (
                 <>
                   <Lock className="Listes__icon" size={20} aria-hidden="true" />
-                  <label>Privé</label>
+                  <span>Privé</span>
                 </>
               )}
             </button>

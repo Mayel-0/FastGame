@@ -15,29 +15,20 @@ const useLikesByUser = () => {
         if (!res.ok) throw Error("Erreur récupération des likes");
         return res.json();
       })
-      .then((data: LikeWithGame[]) =>
-        data.map(
-          ({
-            game_id,
-            titre,
-            studio,
-            plateforme,
-            annee,
-            genre,
-            image,
-            url,
-          }) => ({
-            id: game_id,
-            titre,
-            studio,
-            plateforme,
-            annee,
-            genre,
-            image,
-            url,
-          }),
-        ),
-      )
+      .then((data: LikeWithGame[]) => {
+        const mappedGames: Game[] = data.map((item) => ({
+          id: item.game_id,
+          titre: item.titre ?? null,
+          studio: item.studio ?? null,
+          plateforme: item.plateforme ?? null,
+          annee: item.annee ? String(item.annee) : null,
+          genre: item.genre ?? null,
+          image: item.image ?? null,
+          url: item.url ?? null,
+        }));
+
+        return mappedGames;
+      })
       .then(setGames)
       .catch(setError)
       .finally(() => setLoading(false));

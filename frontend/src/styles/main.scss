@@ -15,4 +15,7 @@
 @use './utilities/utilities';
 @use './components/pageLoader';
 @use './components/note-list';
+@use './components/listes' as componentListes;
+@use './components/steam-login';
 @use './pages/details-game';
+@use './pages/listes' as pageListes;

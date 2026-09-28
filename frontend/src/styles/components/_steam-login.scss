@@ -1,0 +1,36 @@
+.steam-login {
+	display: grid;
+	place-items: center;
+	padding: 2rem 1.25rem 3rem;
+
+	&__card {
+		width: min(100%, 28rem);
+		padding: 2rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-paper);
+		box-shadow: var(--shadow-card);
+		text-align: center;
+	}
+
+	&__eyebrow {
+		margin: 0 0 .75rem;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .7rem;
+		font-weight: 700;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: clamp(1.8rem, 5vw, 2.5rem);
+	}
+
+	&__text {
+		margin: 1rem 0 0;
+		color: var(--color-copy);
+		line-height: 1.6;
+	}
+}

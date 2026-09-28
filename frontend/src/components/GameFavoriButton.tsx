@@ -27,24 +27,12 @@ function GameFavoriButton({ gameId, isFavori = false, onToggle }: GameFavoriButt
   }
 
   return (
-    <form className="game-favori" onSubmit={handleSubmit} style={{ width: "100%" }}>
+    <form className="game-favori" onSubmit={handleSubmit}>
       <button
         className={`game-favori__button ${isFavori ? "game-favori__button--active" : ""}`}
         type="submit"
         disabled={isLoading}
         aria-label={isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
-        style={{
-          width: "100%",
-          textAlign: "left",
-          padding: "8px 12px",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          fontWeight: "600",
-        }}
       >
         <Star
           size={16}

@@ -1,0 +1,58 @@
+.Listes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+	gap: 1.25rem;
+	max-width: var(--content-width);
+	margin: 0 auto;
+	padding: 0 1rem 4rem;
+
+	> a {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		height: 100%;
+		padding: 1.5rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-paper);
+		box-shadow: var(--shadow-card);
+		transition: transform .2s ease, box-shadow .2s ease;
+
+		&:hover {
+			transform: translateY(-4px);
+			box-shadow: 8px 10px 0 #b8caca;
+		}
+	}
+
+	&__icon {
+		color: var(--color-coral);
+	}
+
+	h3 {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: 1.45rem;
+		line-height: 1.2;
+	}
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: .5rem;
+		width: fit-content;
+		margin-top: auto;
+		padding: .5rem .8rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-page);
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: .8rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+}

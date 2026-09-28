@@ -42,9 +42,11 @@ function DynamiqueListePage() {
   // Guards conditionnels après tous les hooks
   if (isLoadingData) {
     return (
-      <main>
+      <main className="list-page">
         <PageLoader loading={true}>
-          <h2>{title}</h2>
+          <div className="list-page__header">
+            <h2 className="list-page__title">{title}</h2>
+          </div>
         </PageLoader>
       </main>
     );
@@ -55,10 +57,12 @@ function DynamiqueListePage() {
   }
 
   return (
-    <main>
+    <main className="list-page">
       <PageLoader loading={false}>
-        <h2>{title}</h2>
-        <hr />
+        <div className="list-page__header">
+          <h2 className="list-page__title">{title}</h2>
+        </div>
+        <hr className="list-page__divider" />
         <GameList onToggleLike={toggleLike} likes={likes} games={games} />
       </PageLoader>
     </main>

@@ -16,4 +16,8 @@
 	--font-body: Georgia, "Times New Roman", serif;
 	--font-ui: "Trebuchet MS", Arial, sans-serif;
 	--content-width: 82rem;
+	--shadow-soft: 0 16px 36px rgba(27, 43, 44, 0.08);
+	--shadow-card: 6px 6px 0 var(--color-teal-soft);
+	--ease: cubic-bezier(0.4, 0, 0.2, 1);
+	--loader-bg: #f5f1e8;
 }

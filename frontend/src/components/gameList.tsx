@@ -80,13 +80,12 @@ function GameList({
               <div><dt>Plateforme</dt><dd>{game.plateforme || "Non renseignée"}</dd></div>
             </dl>
 
-            <Link to={`/jeux/d/${toSlug(game.titre ?? "")}`} state={{ game }}>
+            <Link className="game-card__link" to={`/jeux/d/${toSlug(game.titre ?? "")}`} state={{ game }}>
               Voir la fiche
             </Link>
 
-            {/* 3. Masquer le bloc d'actions s'il n'est pas connecté */}
             {isAuthenticated && (
-              <div className="game-card__actions" style={{ position: "relative" }}>
+              <div className="game-card__actions">
                 <GameLikeButton
                   gameId={game.id}
                   liked={likes[game.id] ?? false}
@@ -102,26 +101,9 @@ function GameList({
                   <Menu size={20} aria-hidden="true" />
                 </button>
 
-                {/* Menu déroulant */}
                 {openMenuId === game.id && (
-                  <div
-                    className="game-card__dropdown"
-                    style={{
-                      position: "absolute",
-                      bottom: "100%",
-                      right: 0,
-                      backgroundColor: "#fff",
-                      border: "1px solid #ccc",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                      zIndex: 10,
-                      minWidth: "160px",
-                      padding: "6px 0",
-                    }}
-                  >
-                    <p style={{ padding: "4px 12px", fontSize: "12px", color: "#666", fontWeight: "bold", margin: 0 }}>
-                      Ajouter à...
-                    </p>
+                  <div className="game-card__dropdown">
+                    <p className="game-card__dropdown-label">Ajouter à...</p>
 
                     <GameFavoriButton
                       gameId={game.id}
@@ -136,18 +118,8 @@ function GameList({
                         <button
                           key={liste.id}
                           type="button"
+                          className="game-card__dropdown-item"
                           onClick={() => handleSelectOption(liste.id, game.id)}
-                          style={{
-                            width: "100%",
-                            textAlign: "left",
-                            padding: "8px 12px",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
                         >
                           <Folder size={16} />
                           {liste.liste_title}

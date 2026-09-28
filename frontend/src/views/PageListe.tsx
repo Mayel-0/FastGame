@@ -29,16 +29,29 @@ function PageListe() {
   };
 
   return (
-    <main>
+    <main className="page-liste">
       <PageLoader loading={isLoading}>
-        <form onSubmit={handleCreate}>
-          <input
-            type="text"
-            placeholder="Titre de la nouvelle liste..."
-            value={newListTitle}
-            onChange={(e) => setNewListTitle(e.target.value)}
-          />
-          <label>
+        <div className="page-liste__header">
+          <p className="page-liste__eyebrow">Mes listes</p>
+          <h1 className="page-liste__title">Organise tes jeux</h1>
+          <p className="page-liste__intro">
+            Crée des listes personnalisées pour ranger tes jeux favoris, tes likes ou tes découvertes à venir.
+          </p>
+        </div>
+
+        <form className="page-liste__form" onSubmit={handleCreate}>
+          <label className="page-liste__field">
+            <span>Nom de la liste</span>
+            <input
+              className="page-liste__input"
+              type="text"
+              placeholder="Titre de la nouvelle liste..."
+              value={newListTitle}
+              onChange={(e) => setNewListTitle(e.target.value)}
+            />
+          </label>
+
+          <label className="page-liste__toggle">
             <input
               type="checkbox"
               checked={isPublic}
@@ -46,7 +59,8 @@ function PageListe() {
             />
             Publique
           </label>
-          <button type="submit">Créer la liste</button>
+
+          <button className="page-liste__submit" type="submit">Créer la liste</button>
         </form>
 
         <ListesList listes={formattedLists} updateList={updateList} />

@@ -16,29 +16,20 @@ const useFavorisByUser = () => {
           throw new Error("Erreur lors de la récupération des favoris");
         return res.json();
       })
-      .then((data: FavoriWithGame[]) =>
-        data.map(
-          ({
-            game_id,
-            titre,
-            studio,
-            plateforme,
-            annee,
-            genre,
-            image,
-            url,
-          }) => ({
-            id: game_id,
-            titre,
-            studio,
-            plateforme,
-            annee,
-            genre,
-            image,
-            url,
-          }),
-        ),
-      )
+      .then((data: FavoriWithGame[]) => {
+        const mappedGames: Game[] = data.map((item) => ({
+          id: item.game_id,
+          titre: item.titre ?? null,
+          studio: item.studio ?? null,
+          plateforme: item.plateforme ?? null,
+          annee: item.annee ? String(item.annee) : null,
+          genre: item.genre ?? null,
+          image: item.image ?? null,
+          url: item.url ?? null,
+        }));
+
+        return mappedGames;
+      })
       .then(setGames)
       .catch((err) => setError((err as Error).message))
       .finally(() => setLoading(false));
