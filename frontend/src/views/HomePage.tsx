@@ -5,16 +5,33 @@ import { useAuth } from "../context/AuthContext";
 import PageLoader from "../components/pageLoader";
 import useAllGame from "../hooks/useAllGame";
 import useLikeStatus from "../hooks/useLikeStatus";
+import useUserLists from "../hooks/useUserLists";
+import useFavoris from "../hooks/useFavoris";
 
 function HomePage() {
   const { AllGames: games, loading: loadingGames, error } = useAllGame();
+  const { joinedLists, addItemToList, loading: listsLoading } = useUserLists();
   const { isLoading: loadingUser} = useAuth();
   const gameIds = games.map((g) => g.id);
   const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);
   const [search, setSearch] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("Tous");
+  const { toggleFavori } = useFavoris();
 
-  const isLoading = [loadingGames,loadingUser,loadingLikes].some(Boolean)
+  const isLoading = [loadingGames,loadingUser,loadingLikes,listsLoading].some(Boolean)
+
+  const availableLists = joinedLists.map((l) => ({
+    id: l.list_id,
+    liste_title: l.title,
+  }));
+
+  const handleAddToList = async (listId: number, gameId: number) => {
+    if (listId === 0) {
+      await toggleFavori(gameId);
+    } else {
+      await addItemToList(listId, gameId);
+    }
+  };
 
   const genres = useMemo(() => {
     const values = games
@@ -82,7 +99,15 @@ function HomePage() {
           {!error && filteredGames.length === 0 && (
             <p className="game-list__state">Aucun jeu ne correspond à votre recherche.</p>
           )}
-          {!error && filteredGames.length > 0 && <GameList onToggleLike={toggleLike} likes={likes} games={filteredGames} />}
+          {!error && filteredGames.length > 0
+          && <GameList
+            games={games}
+            likes={likes}
+            onToggleLike={toggleLike}
+            lists={availableLists}
+            favorisListId={0}
+            onAddToList={handleAddToList}
+          />}
         </section>
       </div>
     </PageLoader>

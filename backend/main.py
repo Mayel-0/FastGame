@@ -13,6 +13,10 @@ from routes.genre import router as genre_router
 from routes.likes import router as likes_router
 from routes.notes import router as notes_router
 from routes.users import router as users_router
+from routes.lists import router as lists_router
+from routes.favoris import router as favoris_router
+from routes.steam import router as steam_router
+
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
 app = FastAPI(
@@ -67,6 +71,9 @@ app.include_router(genre_router)
 app.include_router(likes_router)
 app.include_router(notes_router)
 app.include_router(users_router)
+app.include_router(lists_router)
+app.include_router(favoris_router)
+app.include_router(steam_router)
 
 @app.get("/")
 def read_root():
