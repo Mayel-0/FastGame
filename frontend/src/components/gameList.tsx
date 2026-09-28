@@ -59,7 +59,10 @@ function GameList({
   return (
     <section className="game-list" aria-label="Liste des jeux">
       {games.map((game) => (
-        <article className="game-card" key={game.id}>
+        <article
+          className={`game-card ${openMenuId === game.id ? "game-card--menu-open" : ""}`}
+          key={game.id}
+        >
           <div className="game-card__media">
             {game.image ? (
               <img src={game.image} alt={`Pochette de ${game.titre}`} loading="lazy" />
@@ -92,42 +95,44 @@ function GameList({
                   onToggle={onToggleLike}
                 />
 
-                <button
-                  type="button"
-                  className="game-card__menu-btn"
-                  onClick={() => toggleMenu(game.id)}
-                  aria-label="Ajouter à une liste"
-                >
-                  <Menu size={20} aria-hidden="true" />
-                </button>
+                <div className="game-card__menu">
+                  <button
+                    type="button"
+                    className="game-card__menu-btn"
+                    onClick={() => toggleMenu(game.id)}
+                    aria-label="Ajouter à une liste"
+                  >
+                    <Menu size={20} aria-hidden="true" />
+                  </button>
 
-                {openMenuId === game.id && (
-                  <div className="game-card__dropdown">
-                    <p className="game-card__dropdown-label">Ajouter à...</p>
+                  {openMenuId === game.id && (
+                    <div className="game-card__dropdown">
+                      <p className="game-card__dropdown-label">Ajouter à...</p>
 
-                    <GameFavoriButton
-                      gameId={game.id}
-                      isFavori={favorisMap[game.id] ?? false}
-                      onToggle={handleToggleFavori}
-                    />
+                      <GameFavoriButton
+                        gameId={game.id}
+                        isFavori={favorisMap[game.id] ?? false}
+                        onToggle={handleToggleFavori}
+                      />
 
-                    <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "4px 0" }} />
+                      <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "4px 0" }} />
 
-                    {otherLists.length > 0 ? (
-                      otherLists.map((liste) => (
-                        <button
-                          key={liste.id}
-                          type="button"
-                          className="game-card__dropdown-item"
-                          onClick={() => handleSelectOption(liste.id, game.id)}
-                        >
-                          <Folder size={16} />
-                          {liste.liste_title}
-                        </button>
-                      ))
-                    ) : null}
-                  </div>
-                )}
+                      {otherLists.length > 0 ? (
+                        otherLists.map((liste) => (
+                          <button
+                            key={liste.id}
+                            type="button"
+                            className="game-card__dropdown-item"
+                            onClick={() => handleSelectOption(liste.id, game.id)}
+                          >
+                            <Folder size={16} />
+                            {liste.liste_title}
+                          </button>
+                        ))
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
