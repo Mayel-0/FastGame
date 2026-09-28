@@ -10,6 +10,7 @@ import DynamiqueListePage from './views/DynamiqueListePage';
 import Notfound from './views/NotFound';
 import PageDetailsgame from './views/PageDetailsGame';
 import PageListe from './views/PageListe';
+import CommuPage from './views/CommuPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Header />
       <Routes>
         <Route path='/listes' element={<PageListe/>} />
+        <Route path='/commu' element={<CommuPage/>} />
         <Route path='/jeux/d/:slug' element={<PageDetailsgame />} />
         <Route path='/listes/:title' element={<DynamiqueListePage/>} />
         <Route path='/' element={<HomePage/>}/>

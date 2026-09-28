@@ -32,8 +32,7 @@ function Header() {
         <ul className="header__menu">
           <li className="header__item"><Link className="header__link" to="/">Accueil</Link></li>
           <li className="header__item"><Link className="header__link" to="/jeux">Jeux</Link></li>
-          <li className="header__item"><Link className="header__link" to="/actualites">Actualites</Link></li>
-          <li className="header__item"><Link className="header__link" to="/nouveautes">Nouveautes</Link></li>
+          <li className="header__item"><Link className="header__link" to="/commu">Communauté</Link></li>
         </ul>
       </nav>
       <div className="header__actions">
