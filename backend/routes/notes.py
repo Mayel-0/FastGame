@@ -1,22 +1,27 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db.database import get_db
-from models.game import GameModel, GameSchema
-from models.notes import NoteModel
+from models.game import GameModel
+from models.notes import NoteModel, RankedGameOut
 from models.users import UserModel
 from routes.users import get_current_user
 from utils.security import ALGORITHM, SECRET_KEY
 
 
 class NoteCreateSchema(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     id_game: int = Field(..., gt=0)
     value: int = Field(..., ge=0, le=5)
-    body: str | None = None
+    # Le commentaire est visible par toute la communauté : on le borne
+    body: str | None = Field(default=None, max_length=1000)
+
 
 router = APIRouter(
     prefix="/api/notes",
@@ -66,6 +71,84 @@ def attach_game_notes(db: Session, games: list[GameModel]) -> list[GameModel]:
 
     return games
 
+
+def get_ranked_games(
+    db: Session,
+    best_first: bool,
+    limit: int,
+    min_ratings: int,
+) -> list[dict]:
+    """Classement des jeux par note moyenne.
+
+    min_ratings évite qu'un jeu avec une seule note (1/5 ou 5/5) domine le
+    classement. À égalité de moyenne, le jeu avec le plus de notes passe devant.
+    """
+    avg_rating = func.avg(NoteModel.value)
+    ratings_count = func.count(NoteModel.id)
+
+    rows = (
+        db.query(
+            GameModel.id,
+            GameModel.titre,
+            GameModel.image,
+            avg_rating.label("avg_rating"),
+            ratings_count.label("ratings_count"),
+        )
+        .join(NoteModel, NoteModel.id_game == GameModel.id)
+        .group_by(GameModel.id, GameModel.titre, GameModel.image)
+        .having(ratings_count >= min_ratings)
+        .order_by(
+            avg_rating.desc() if best_first else avg_rating.asc(),
+            ratings_count.desc(),
+            GameModel.id,
+        )
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "id": game_id,
+            "titre": titre,
+            "image": image,
+            "avg_rating": round(float(avg), 2),
+            "ratings_count": count,
+        }
+        for game_id, titre, image, avg, count in rows
+    ]
+
+
+# =========================================================
+# ROUTES PUBLIQUES (page Communauté, sans authentification)
+# =========================================================
+
+# ---------------------------------------------------------
+# GET /api/notes/top : jeux les mieux notés
+# ---------------------------------------------------------
+@router.get("/top", response_model=list[RankedGameOut])
+def get_top_rated_games(
+    limit: int = Query(10, ge=1, le=50),
+    min_ratings: int = Query(3, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return get_ranked_games(db, best_first=True, limit=limit, min_ratings=min_ratings)
+
+
+# ---------------------------------------------------------
+# GET /api/notes/worst : jeux les moins bien notés
+# ---------------------------------------------------------
+@router.get("/worst", response_model=list[RankedGameOut])
+def get_worst_rated_games(
+    limit: int = Query(10, ge=1, le=50),
+    min_ratings: int = Query(3, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return get_ranked_games(db, best_first=False, limit=limit, min_ratings=min_ratings)
+
+
+# =========================================================
+# ROUTES PAR JEU / PAR NOTE
+# =========================================================
 
 @router.get("/game/{game_id}")
 def get_game_note(
@@ -159,7 +242,15 @@ def add_note(
     )
 
     db.add(new_note)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Requête simultanée : la contrainte unique (id_game, id_user) a bloqué le doublon
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Tu as déjà noté ce jeu. Supprime ou modifie ta note existante.",
+        )
     db.refresh(new_note)
 
     return {

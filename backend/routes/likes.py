@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
 from db.database import get_db
 from models.game import GameModel
-from models.likes import LikeModel, LikeCreateSchema
+from models.likes import LikeCreateSchema, LikedGameOut, LikeModel
 from models.users import UserModel
 from routes.users import get_current_user
 
@@ -28,6 +31,47 @@ def serialize_like_with_game(like: LikeModel, game: GameModel | None = None):
         "url": game_data.url,
     }
 
+
+# =========================================================
+# ROUTE PUBLIQUE (page Communauté, sans authentification)
+# ATTENTION : /top doit rester AVANT /{game_id}, sinon FastAPI
+# lit "top" comme un game_id (erreur 422).
+# =========================================================
+
+# ---------------------------------------------------------
+# GET /api/likes/top : jeux les plus likés
+# ---------------------------------------------------------
+@router.get("/top", response_model=list[LikedGameOut])
+def get_most_liked_games(
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    """Classement des jeux par nombre de likes (à égalité : ordre stable par id)."""
+    likes_count = func.count(LikeModel.id)
+
+    rows = (
+        db.query(
+            GameModel.id,
+            GameModel.titre,
+            GameModel.image,
+            likes_count.label("likes"),
+        )
+        .join(LikeModel, LikeModel.game_id == GameModel.id)
+        .group_by(GameModel.id, GameModel.titre, GameModel.image)
+        .order_by(likes_count.desc(), GameModel.id)
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {"id": game_id, "titre": titre, "image": image, "likes": likes}
+        for game_id, titre, image, likes in rows
+    ]
+
+
+# =========================================================
+# ROUTES PERSONNELLES / PAR JEU
+# =========================================================
 
 @router.get("/me")
 def get_my_likes(
@@ -81,6 +125,10 @@ def add_like(
 ):
     """Permet à l'utilisateur connecté d'ajouter un like sur un jeu"""
 
+    # Le jeu existe
+    if not db.get(GameModel, like_data.game_id):
+        raise HTTPException(status_code=404, detail="Jeu introuvable.")
+
     existing_like = db.query(LikeModel).filter(
         LikeModel.user_id == current_user.id,
         LikeModel.game_id == like_data.game_id
@@ -95,7 +143,12 @@ def add_like(
     )
 
     db.add(new_like)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Requête simultanée : la contrainte unique (user_id, game_id) a bloqué le doublon
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Tu as déjà liké ce jeu.")
     db.refresh(new_like)
 
     return {"message": "Like ajouté avec succès", "like_id": new_like.id}
