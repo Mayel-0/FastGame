@@ -128,7 +128,7 @@ def get_ranked_games(
 @router.get("/top", response_model=list[RankedGameOut])
 def get_top_rated_games(
     limit: int = Query(10, ge=1, le=50),
-    min_ratings: int = Query(3, ge=1, le=100),
+    min_ratings: int = Query(1, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     return get_ranked_games(db, best_first=True, limit=limit, min_ratings=min_ratings)
@@ -140,7 +140,7 @@ def get_top_rated_games(
 @router.get("/worst", response_model=list[RankedGameOut])
 def get_worst_rated_games(
     limit: int = Query(10, ge=1, le=50),
-    min_ratings: int = Query(3, ge=1, le=100),
+    min_ratings: int = Query(1, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     return get_ranked_games(db, best_first=False, limit=limit, min_ratings=min_ratings)
