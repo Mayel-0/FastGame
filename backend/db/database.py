@@ -17,12 +17,9 @@ if not DATABASE_URL:
         "et renseigne l'URL de connexion à la base."
     )
 
-database_url = make_url(DATABASE_URL)
-if database_url.drivername.startswith("postgresql") and "sslmode" not in database_url.query:
-    database_url = database_url.update_query_dict({"sslmode": "require"})
-
 engine = create_engine(
-    database_url,
+    DATABASE_URL,
+    connect_args={"sslmode": "disable"},
     pool_pre_ping=True,
     pool_recycle=1800,
     pool_timeout=30,
