@@ -29,9 +29,7 @@ app = FastAPI(
 # 1. Définir les origines autorisées (les domaines qui ont le droit d'appeler ton API)
 origins = [origin.strip() for origin in os.getenv(
     "CORS_ORIGINS",
-    "https://fastgames.mael-llado.com",
-    "http://fastgames.mael-llado.com",
-    "http://localhost:3000,http://localhost:5173",
+    "https://fastgames.mael-llado.com,http://fastgames.mael-llado.com,http://localhost:3000,http://localhost:5173",
 ).split(",") if origin.strip()]
 
 allowed_hosts = [host.strip() for host in os.getenv(
