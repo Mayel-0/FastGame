@@ -9,7 +9,7 @@ import CommunityPublicLists from "../components/CommunityPublicLists";
 function CommuPage() {
   const { data: topGames, loading: loadingTopGames, error: topGamesError } = useTopRatedGames(5);
   const { data: worstGames, loading: loadingWorstGames, error: worstGamesError } = useWorstRatedGames(5);
-  const { data: publicLists, loading: loadingPublicLists, error: publicListsError } = useRandomPublicLists();
+  const { data: publicLists, loading: loadingPublicLists, error: publicListsError } = useRandomPublicLists(8);
   const { data: mostLikedGames, loading: loadingMostLikedGames, error: mostLikedGamesError } = useMostLikedGames(5);
 
   const isLoading = [loadingTopGames, loadingWorstGames, loadingPublicLists, loadingMostLikedGames].some(Boolean);
