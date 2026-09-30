@@ -1,22 +1,54 @@
 import { useTopRatedGames } from "../hooks/useTopRatedGames";
+import { useWorstRatedGames } from "../hooks/useWorstRatedGames";
+import PageLoader from "../components/pageLoader";
+import { useRandomPublicLists } from "../hooks/useRandomPublicLists";
+import { useMostLikedGames } from "../hooks/useMostLikedGames";
 
 function CommuPage() {
-  const { data, loading, error } = useTopRatedGames(5);
+  const { data: TopGame, loading: loadingTopGame, error: errorTopGame } = useTopRatedGames(5);
+  const {data: WorstGame, loading: loadingWorstGame, error: errrorWorstGame} = useWorstRatedGames(5);
+  const {data: ListeRandom, loading: loadingRandomList, error: errorListeRandom}= useRandomPublicLists();
+  const {data: MostLikeGame, loading: loadingMostLikeGame, error: errorMostLikeGame} = useMostLikedGames();
+
+  const isLoading = [loadingTopGame,loadingWorstGame,loadingRandomList, loadingMostLikeGame].some(Boolean)
 
   return (
     <main>
-      <h1>Communauté</h1>
-
-      {loading && <p>Chargement…</p>}
-      {error && <p>Erreur : {error}</p>}
-
-      <ul>
-        {data?.map((game) => (
-          <li key={game.id}>
-            {game.titre} : ★ {game.avg_rating} ({game.ratings_count} notes)
-          </li>
-        ))}
-      </ul>
+      <PageLoader loading={isLoading}>
+        <h1>Communauté</h1>
+        <h3>Top</h3>
+        <ul>
+          {TopGame?.map((game) => (
+            <li key={game.id}>
+              {game.titre} : ★ {game.avg_rating} ({game.ratings_count} notes)
+            </li>
+          ))}
+        </ul>
+        <h3>Worst</h3>
+        <ul>
+          {WorstGame?.map((game) => (
+            <li key={game.id}>
+              {game.titre} : ★ {game.avg_rating} ({game.ratings_count} notes)
+            </li>
+          ))}
+        </ul>
+        <h3>Most Liked</h3>
+        <ul>
+          {MostLikeGame?.map((game) => (
+            <li key={game.id}>
+              {game.titre} : ★ {game.avg_rating} ({game.ratings_count} notes)
+            </li>
+          ))}
+        </ul>
+        <h3>Liste random</h3>
+        <ul>
+          {ListeRandom?.map((liste) => (
+            <li key={liste.list_id}>
+              {liste.owner} : {liste.title} / {liste.items_count}
+            </li>
+          ))}
+        </ul>
+      </PageLoader>
     </main>
   );
 }

@@ -16,6 +16,7 @@ from routes.users import router as users_router
 from routes.lists import router as lists_router
 from routes.favoris import router as favoris_router
 from routes.steam import router as steam_router
+from routes.avatar import router as avatar_router
 
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
@@ -74,6 +75,7 @@ app.include_router(users_router)
 app.include_router(lists_router)
 app.include_router(favoris_router)
 app.include_router(steam_router)
+app.include_router(avatar_router)
 
 @app.get("/")
 def read_root():

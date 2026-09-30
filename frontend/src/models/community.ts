@@ -8,9 +8,9 @@ export interface RankedGame {
 }
 
 export interface PublicList {
-  id: number;
-  name: string;
+  list_id: number;
+  title: string;
   owner: string;
-  games_count: number;
+  items_count: number;
   preview: string[];
 }

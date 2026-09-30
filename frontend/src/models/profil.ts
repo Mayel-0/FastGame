@@ -4,4 +4,5 @@ export default interface Profil {
   email?: string;
   username: string;
   bio: string | null;
+  image_url: string | null;
 }

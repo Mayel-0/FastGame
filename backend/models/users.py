@@ -14,6 +14,7 @@ class UserModel(Base):
     password = Column(String, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     bio = Column(String, nullable=True)
+    image_url = Column(String, nullable=True, server_default="/api/media/default-avatar.svg")
 
     steam_account = relationship("SteamAccountModel", back_populates="user", uselist=False)  # ← ajout
 
@@ -24,6 +25,7 @@ class UserSchema(BaseModel):
     email: str
     username: str
     bio: str | None = None
+    image_url: str | None = None
 
     class Config:
         from_attributes = True
@@ -33,6 +35,7 @@ class PublicUserSchema(BaseModel):
     created_at: datetime | None = None
     username: str
     bio: str | None = None
+    image_url: str | None = None
 
     class Config:
         from_attributes = True
