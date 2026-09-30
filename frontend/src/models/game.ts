@@ -16,6 +16,7 @@ export interface Note {
   id_game: number;
   id_user: number;
   username?: string | null;
+  image_url?: string | null;
   value: number;
   body?: string | null;
 }

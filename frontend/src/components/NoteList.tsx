@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import type { Note } from "../models/game";
+import { useAuth } from "../context/AuthContext";
+import UserIdentity from "./UserIdentity";
 
 interface NoteListProps {
   notes: Note[];
@@ -20,6 +22,7 @@ function NoteList({
   onAddNote,
   onDeleteNote,
 }: NoteListProps) {
+  const { user } = useAuth();
   const [value, setValue] = useState(5);
   const [body, setBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,7 +125,10 @@ function NoteList({
       {isAuthenticated && userNote && (
         <div className="note-list__user-note">
           <div className="note-list__item-header">
-            <h3>Ta note</h3>
+            <div className="note-list__author">
+              {user && <UserIdentity userId={user.id} username={user.username} imageUrl={user.image_url} />}
+              <h3>Ta note</h3>
+            </div>
             <span className="note-list__badge">{userNote.value}/5</span>
           </div>
           <p className="note-list__value">{Array.from({ length: userNote.value }, () => "★").join("")}</p>
@@ -151,7 +157,11 @@ function NoteList({
           otherNotes.map((note) => (
             <article key={note.id} className="note-list__item">
               <div className="note-list__item-header">
-                <strong>{note.username ?? "Joueur"}</strong>
+                <UserIdentity
+                  userId={note.id_user}
+                  username={note.username ?? "Joueur"}
+                  imageUrl={note.image_url}
+                />
                 <span className="note-list__badge">{note.value}/5</span>
               </div>
               <p className="note-list__value">{Array.from({ length: note.value }, () => "★").join("")}</p>

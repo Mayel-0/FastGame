@@ -55,6 +55,23 @@
     gap: .75rem;
   }
 
+  &__profile-menu {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-ink);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-coral);
+      color: var(--color-coral);
+    }
+  }
+
   &__action {
     padding: .55rem .75rem;
 

@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ProfileDrawer from "./ProfileDrawer";
+import { Menu } from "lucide-react";
+import UserIdentity from "./UserIdentity";
 
 function Header() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -43,14 +45,9 @@ function Header() {
           </div>
         ) : (
           <div className="header__action-group">
-            <button
-              className="header__action header__action--primary"
-              type="button"
-              onClick={() => setIsProfileMenuOpen(true)}
-              aria-expanded={isProfileMenuOpen}
-              aria-controls="profile-drawer"
-            >
-              profil
+            {user && <UserIdentity userId={user.id} username={user.username} imageUrl={user.image_url} />}
+            <button className="header__profile-menu" type="button" onClick={() => setIsProfileMenuOpen(true)} aria-label="Ouvrir le menu du profil" aria-expanded={isProfileMenuOpen} aria-controls="profile-drawer">
+              <Menu size={20} aria-hidden="true" />
             </button>
           </div>
         )}

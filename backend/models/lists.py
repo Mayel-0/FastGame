@@ -83,7 +83,9 @@ class PublicGameOut(BaseModel):
 class PublicListOut(BaseModel):
     list_id: int
     title: str
+    owner_id: int
     owner: str
+    owner_image_url: str | None = None
     items_count: int
     preview: list[str]
 
@@ -91,6 +93,8 @@ class PublicListOut(BaseModel):
 class PublicListDetailOut(BaseModel):
     list_id: int
     title: str
+    owner_id: int
     owner: str
+    owner_image_url: str | None = None
     items_count: int
     games: list[PublicGameOut]

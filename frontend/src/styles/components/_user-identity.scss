@@ -1,0 +1,35 @@
+.user-identity {
+	display: inline-flex;
+	align-items: center;
+	gap: .6rem;
+	min-width: 0;
+	color: var(--color-ink);
+	font-family: var(--font-ui);
+	font-weight: 700;
+	text-decoration: none;
+
+	&:hover {
+		color: var(--color-coral);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--color-coral);
+		outline-offset: 3px;
+	}
+
+	&__avatar {
+		flex: 0 0 auto;
+		width: 2.5rem;
+		aspect-ratio: 1;
+		border: 1px solid var(--color-line);
+		border-radius: 50%;
+		background: var(--color-teal-pale);
+		object-fit: cover;
+	}
+
+	&__name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
