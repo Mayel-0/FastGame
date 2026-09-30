@@ -1,3 +1,4 @@
+from sqlalchemy import func, or_
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -235,6 +236,66 @@ def get_random_public_lists(
     ]
 
 
+def _escape_like(value: str) -> str:
+    """Neutralise % et _ pour que la saisie soit cherchée telle quelle."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+# GET /api/lists/public/search?q=... : listes publiques par titre OU par pseudo
+@router.get("/public/search", response_model=list[PublicListOut])
+def search_public_lists(
+    q: str = Query(..., min_length=2, max_length=50),
+    limit: int = Query(20, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    term = q.strip()
+    if len(term) < 2:
+        return []
+
+    pattern = f"%{_escape_like(term)}%"
+    rows = (
+        db.query(ListeModel, UserModel.username)
+        .join(UserModel, UserModel.id == ListeModel.users_id)
+        .filter(
+            ListeModel.public.is_(True),  # une liste privée ne peut jamais sortir
+            ListeModel.items_count > 0,
+            or_(
+                ListeModel.liste_title.ilike(pattern, escape="\\"),
+                UserModel.username.ilike(pattern, escape="\\"),
+            ),
+        )
+        .order_by(ListeModel.created_at.desc(), ListeModel.id.desc())
+        .limit(limit)
+        .all()
+    )
+    if not rows:
+        return []
+
+    # Une seule requête pour les pochettes (4 max par liste)
+    list_ids = [user_list.id for user_list, _ in rows]
+    images = (
+        db.query(ListeItemModel.id_list, GameModel.image)
+        .join(GameModel, GameModel.id == ListeItemModel.id_item)
+        .filter(ListeItemModel.id_list.in_(list_ids))
+        .all()
+    )
+    previews: dict[int, list[str]] = {}
+    for list_id, image in images:
+        bucket = previews.setdefault(list_id, [])
+        if image and len(bucket) < 4:
+            bucket.append(image)
+
+    return [
+        {
+            "list_id": user_list.id,
+            "title": user_list.liste_title,
+            "owner": username,
+            "items_count": user_list.items_count or 0,
+            "preview": previews.get(user_list.id, []),
+        }
+        for user_list, username in rows
+    ]
+
 # ---------------------------------------------------------
 # GET /api/lists/public/{list_id} : détail d'une liste publique
 # ---------------------------------------------------------
@@ -353,3 +414,4 @@ def delete_list(
     db.commit()
 
     return None
+
