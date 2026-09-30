@@ -290,6 +290,7 @@ def search_public_lists(
             "list_id": user_list.id,
             "title": user_list.liste_title,
             "owner": username,
+            "owner_id": user_list.users_id,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
         }
