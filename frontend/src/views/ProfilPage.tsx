@@ -1,36 +1,26 @@
-import { useState } from "react";
+import { useParams } from "react-router-dom";
 import UserDetails from "../components/userDetails";
-import AvatarUploader from "../components/avatarUpload";
 import { useAuth } from "../context/AuthContext";
 import useUserById from "../hooks/useUserById";
 import PageLoader from "../components/pageLoader";
 
 function ProfilPage() {
+  const { userId: routeUserId } = useParams<{ userId: string }>();
   const { user: currentUser, isLoading: loadingCurrentUser } = useAuth();
-  const { user, loading: loadingUser } = useUserById(currentUser?.id ?? null);
+  const parsedUserId = routeUserId ? Number(routeUserId) : currentUser?.id ?? null;
+  const isValidUserId = parsedUserId === null || (Number.isInteger(parsedUserId) && parsedUserId > 0);
+  const { user, loading: loadingUser, error } = useUserById(isValidUserId ? parsedUserId : null);
 
-  // Nouvelle URL d'avatar après un upload (évite de recharger toute la page)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  const isLoading = [loadingCurrentUser, loadingUser].some(Boolean);
+  const isLoading = loadingUser || (!routeUserId && loadingCurrentUser);
 
   return (
     <PageLoader loading={isLoading}>
-      {!isLoading && (!currentUser || !user) ? (
+      {!isLoading && (!isValidUserId || !user) ? (
         <main className="profile-details">
-          <p role="alert">Profil introuvable.</p>
+          <p role="alert">{error ?? "Profil introuvable."}</p>
         </main>
-      ) : !isLoading && currentUser && user ? (
-        <>
-          <AvatarUploader
-            imageUrl={avatarUrl ?? user.image_url}
-            onChange={setAvatarUrl}
-          />
-          <UserDetails
-            profil={{ ...user, image_url: avatarUrl ?? user.image_url }}
-            currentUser={currentUser}
-          />
-        </>
+      ) : !isLoading && user ? (
+        <UserDetails profil={user} currentUser={currentUser} />
       ) : null}
     </PageLoader>
   );

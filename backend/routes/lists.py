@@ -197,7 +197,7 @@ def get_random_public_lists(
     """Tirer au hasard des listes publiques non vides."""
     # NB : func.random() fonctionne sur PostgreSQL et SQLite (MySQL : func.rand())
     rows = (
-        db.query(ListeModel, UserModel.username)  # adapte "username" au champ pseudo de UserModel
+        db.query(ListeModel, UserModel.id, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
         .filter(ListeModel.public.is_(True), ListeModel.items_count > 0)
         .order_by(func.random())
@@ -208,7 +208,7 @@ def get_random_public_lists(
         return []
 
     # Une seule requête pour toutes les pochettes (évite le N+1)
-    list_ids = [user_list.id for user_list, _ in rows]
+    list_ids = [user_list.id for user_list, _, _, _ in rows]
     images = (
         db.query(ListeItemModel.id_list, GameModel.image)
         .join(GameModel, GameModel.id == ListeItemModel.id_item)
@@ -225,11 +225,13 @@ def get_random_public_lists(
         {
             "list_id": user_list.id,
             "title": user_list.liste_title,
+            "owner_id": owner_id,
             "owner": username,
+            "owner_image_url": owner_image_url,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
         }
-        for user_list, username in rows
+        for user_list, owner_id, username, owner_image_url in rows
     ]
 
 
@@ -240,7 +242,7 @@ def get_random_public_lists(
 def get_public_list(list_id: int, db: Session = Depends(get_db)):
     """Détail d'une liste publique. 404 si elle est privée ou inexistante (on ne révèle rien)."""
     row = (
-        db.query(ListeModel, UserModel.username)
+        db.query(ListeModel, UserModel.id, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
         .filter(ListeModel.id == list_id, ListeModel.public.is_(True))
         .first()
@@ -248,7 +250,7 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
     if not row:
         raise HTTPException(status_code=404, detail="Liste introuvable.")
 
-    user_list, username = row
+    user_list, owner_id, username, owner_image_url = row
     games = (
         db.query(GameModel)
         .join(ListeItemModel, ListeItemModel.id_item == GameModel.id)
@@ -259,7 +261,9 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
     return {
         "list_id": user_list.id,
         "title": user_list.liste_title,
+        "owner_id": owner_id,
         "owner": username,
+        "owner_image_url": owner_image_url,
         "items_count": len(games),
         "games": [{"id": g.id, "titre": g.titre, "image": g.image} for g in games],
     }

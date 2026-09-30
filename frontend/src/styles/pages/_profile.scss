@@ -4,9 +4,27 @@
 	margin: 0 auto;
 	padding: 4rem 0;
 
-	&__heading {
+	&__hero {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
 		padding-bottom: 2rem;
 		border-bottom: 1px solid var(--color-line);
+	}
+
+	&__avatar {
+		flex: 0 0 auto;
+		width: 7rem;
+		aspect-ratio: 1;
+		border: 3px solid var(--color-paper);
+		border-radius: 50%;
+		background: var(--color-teal-pale);
+		box-shadow: 0 0 0 1px var(--color-line);
+		object-fit: cover;
+	}
+
+	&__heading {
+		padding-bottom: 0;
 	}
 
 	&__eyebrow {
@@ -135,5 +153,14 @@
 
 	.profile-field button {
 		width: 100%;
+	}
+
+	.profile-details__hero {
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.profile-details__avatar {
+		width: 5.5rem;
 	}
 }

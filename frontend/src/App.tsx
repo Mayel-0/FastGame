@@ -26,6 +26,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profil" element={<ProfilPage />} />
+        <Route path="/profil/:userId" element={<ProfilPage />} />
         <Route path="*" element={<Notfound />} />
       </Routes>
       <Footer/>

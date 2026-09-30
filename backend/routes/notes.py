@@ -164,7 +164,7 @@ def get_game_note(
         )
 
     notes_query = (
-        db.query(NoteModel, UserModel.username)
+        db.query(NoteModel, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == NoteModel.id_user)
         .filter(NoteModel.id_game == game_id)
         .order_by(NoteModel.id.desc())
@@ -177,10 +177,11 @@ def get_game_note(
             "id_game": note.id_game,
             "id_user": note.id_user,
             "username": username,
+            "image_url": image_url,
             "value": note.value,
             "body": note.body,
         }
-        for note, username in notes_query
+        for note, username, image_url in notes_query
     ]
 
     if current_user is not None:

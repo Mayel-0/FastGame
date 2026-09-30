@@ -13,6 +13,9 @@ from sqlalchemy.pool import StaticPool
 
 from main import app
 from db.database import Base
+from models.game import GameModel
+from models.lists import ListeItemModel, ListeModel
+from models.notes import NoteModel
 from models.users import UserModel
 from routes.users import get_db
 from utils.security import hash_password
@@ -43,6 +46,7 @@ class JwtAuthTests(unittest.TestCase):
             password=hash_password("secret123"),
             username="alice",
             bio="hello",
+            image_url="/api/media/avatars/alice.webp",
         )
         db.add(user)
         db.commit()
@@ -75,6 +79,54 @@ class JwtAuthTests(unittest.TestCase):
 
         without_token_response = client.get("/api/users/me")
         self.assertEqual(without_token_response.status_code, 401)
+
+    def test_public_profile_returns_username_and_avatar_without_email(self):
+        client = TestClient(app, base_url="http://localhost")
+
+        response = client.get(f"/api/users/{self.user_id}")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["username"], "alice")
+        self.assertEqual(response.json()["image_url"], "/api/media/avatars/alice.webp")
+        self.assertNotIn("email", response.json())
+
+    def test_random_public_lists_include_owner_profile_data(self):
+        db = self.SessionLocal()
+        game = GameModel(titre="Test Game", image="/game.jpg")
+        public_list = ListeModel(id=1, users_id=self.user_id, liste_title="À jouer", public=True, items_count=1)
+        db.add_all([game, public_list])
+        db.commit()
+        db.refresh(game)
+        db.add(ListeItemModel(id_list=public_list.id, id_item=game.id, id_user=self.user_id))
+        db.commit()
+        db.close()
+
+        client = TestClient(app, base_url="http://localhost")
+        response = client.get("/api/lists/public/random?limit=1")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["owner_id"], self.user_id)
+        self.assertEqual(response.json()[0]["owner"], "alice")
+        self.assertEqual(response.json()[0]["owner_image_url"], "/api/media/avatars/alice.webp")
+
+    def test_game_notes_include_author_profile_image(self):
+        db = self.SessionLocal()
+        game = GameModel(titre="Test Game")
+        db.add(game)
+        db.commit()
+        db.refresh(game)
+        game_id = game.id
+        db.add(NoteModel(id_game=game.id, id_user=self.user_id, value=5, body="Très bien"))
+        db.commit()
+        db.close()
+
+        client = TestClient(app, base_url="http://localhost")
+        response = client.get(f"/api/notes/game/{game_id}")
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["notes"][0]["username"], "alice")
+        self.assertEqual(response.json()["notes"][0]["image_url"], "/api/media/avatars/alice.webp")
 
 
 if __name__ == "__main__":

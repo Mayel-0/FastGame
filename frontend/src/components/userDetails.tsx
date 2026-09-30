@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProfileField from "./ProfileField";
+import AvatarUploader from "./avatarUpload";
 import { useAuth } from "../context/AuthContext";
 import type Profil from "../models/profil";
+import { resolveMediaUrl } from "../utils/media";
 
 interface UserDetailsProps {
   profil: Profil;
@@ -15,6 +17,14 @@ function UserDetails({ profil, currentUser }: UserDetailsProps) {
   const isMe = currentUser?.id === profil.id;
   const [profile, setProfile] = useState(profil);
   const [email, setEmail] = useState(currentUser?.email ?? "");
+
+  useEffect(() => {
+    setProfile(profil);
+  }, [profil]);
+
+  useEffect(() => {
+    if (currentUser?.email) setEmail(currentUser.email);
+  }, [currentUser?.email]);
 
   async function updateField(field: "username" | "bio" | "email" | "password", value: string) {
     if (!isMe || !currentUser) return;
@@ -34,10 +44,18 @@ function UserDetails({ profil, currentUser }: UserDetailsProps) {
 
   return (
     <section className="profile-details" aria-labelledby="profile-title">
-      <div className="profile-details__heading">
-        <p className="profile-details__eyebrow">{isMe ? "Mon profil" : "Profil joueur"}</p>
-        <h1 id="profile-title">{profile.username}</h1>
-        <p className="profile-details__status">{isMe ? "Gerez vos informations personnelles." : "Profil public en lecture seule."}</p>
+      <div className="profile-details__hero">
+        <img className="profile-details__avatar" src={resolveMediaUrl(profile.image_url)} alt={`Photo de ${profile.username}`} />
+        <div className="profile-details__heading">
+          <p className="profile-details__eyebrow">{isMe ? "Mon profil" : "Profil joueur"}</p>
+          <h1 id="profile-title">{profile.username}</h1>
+          <p className="profile-details__status">{isMe ? "Gérez vos informations personnelles." : "Profil public en lecture seule."}</p>
+        </div>
+        {isMe && (
+          <AvatarUploader
+            onChange={(imageUrl) => setProfile((current) => ({ ...current, image_url: imageUrl }))}
+          />
+        )}
       </div>
 
       <div className="profile-details__fields">

@@ -149,6 +149,18 @@
     font-family: var(--font-ui);
   }
 
+  &__author {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+    min-width: 0;
+  }
+
+  &__author h3 {
+    margin: 0;
+  }
+
   &__badge {
     padding: .2rem .5rem;
     background: var(--color-teal-soft);
