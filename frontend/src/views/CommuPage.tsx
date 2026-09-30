@@ -5,10 +5,10 @@ import { useRandomPublicLists } from "../hooks/useRandomPublicLists";
 import { useMostLikedGames } from "../hooks/useMostLikedGames";
 
 function CommuPage() {
-  const { data: TopGame, loading: loadingTopGame, error: errorTopGame } = useTopRatedGames(5);
-  const {data: WorstGame, loading: loadingWorstGame, error: errrorWorstGame} = useWorstRatedGames(5);
-  const {data: ListeRandom, loading: loadingRandomList, error: errorListeRandom}= useRandomPublicLists();
-  const {data: MostLikeGame, loading: loadingMostLikeGame, error: errorMostLikeGame} = useMostLikedGames();
+  const { data: TopGame, loading: loadingTopGame } = useTopRatedGames(5);
+  const {data: WorstGame, loading: loadingWorstGame } = useWorstRatedGames(5);
+  const {data: ListeRandom, loading: loadingRandomList }= useRandomPublicLists();
+  const {data: MostLikeGame, loading: loadingMostLikeGame } = useMostLikedGames();
 
   const isLoading = [loadingTopGame,loadingWorstGame,loadingRandomList, loadingMostLikeGame].some(Boolean)
 
