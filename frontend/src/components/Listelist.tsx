@@ -40,10 +40,11 @@ function ListesList({ listes, updateList }: ListesListProps) {
       </Link>
 
       {listes.map((items) => (
-        <Link key={items.id} to={`/listes/${items.liste_title}`}>
           <article className="Listes__card">
             <Folder className="Listes__icon" size={20} aria-hidden="true" />
-            <h3>{items.liste_title}</h3>
+            <Link key={items.id} to={`/listes/${items.liste_title}`}>
+              <h3>{items.liste_title}</h3>
+            </Link>
 
             <button type="button" onClick={() => handleTogglePublic(items)}>
               {items.public ? (
@@ -59,7 +60,6 @@ function ListesList({ listes, updateList }: ListesListProps) {
               )}
             </button>
           </article>
-        </Link>
       ))}
     </section>
   );
