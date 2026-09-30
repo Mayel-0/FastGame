@@ -17,7 +17,7 @@ AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 # URL publique (sous /api pour passer par le même proxy que le reste de l'API)
 MEDIA_URL = "/api/media"
-DEFAULT_AVATAR_URL = f"{MEDIA_URL}/default-avatar.svg"
+DEFAULT_AVATAR_URL = f"{MEDIA_URL}/default-avatar.png"
 
 MAX_UPLOAD_BYTES = 2 * 1024 * 1024        # 2 Mo
 MAX_PIXELS = 25_000_000                   # protège contre les images géantes (decompression bomb)
