@@ -2,6 +2,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from routes.games import router as games_router
 from routes.id import router as game_id_router
@@ -16,7 +17,7 @@ from routes.users import router as users_router
 from routes.lists import router as lists_router
 from routes.favoris import router as favoris_router
 from routes.steam import router as steam_router
-from routes.avatar import router as avatar_router
+from routes.avatar import router as avatar_router, MEDIA_DIR
 
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
@@ -76,6 +77,10 @@ app.include_router(lists_router)
 app.include_router(favoris_router)
 app.include_router(steam_router)
 app.include_router(avatar_router)
+
+# Fichiers statiques : avatar par défaut et photos de profil (backend/media/)
+# Placé après les routers, sous /api pour passer par le même proxy nginx que l'API
+app.mount("/api/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 @app.get("/")
 def read_root():
