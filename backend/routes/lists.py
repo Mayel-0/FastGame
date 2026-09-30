@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -22,46 +22,6 @@ router = APIRouter(
     prefix="/api/lists",
     tags=["Lists"]
 )
-
-
-# =========================================================
-# OUTILS INTERNES (routes publiques)
-# =========================================================
-
-def _escape_like(value: str) -> str:
-    """Neutralise % et _ pour que la saisie de l'utilisateur soit cherchée telle quelle."""
-    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-
-
-def _serialize_public_lists(db: Session, rows) -> list[dict]:
-    """Transforme des lignes (ListeModel, username) en PublicListOut, avec 4 pochettes max."""
-    if not rows:
-        return []
-
-    # Une seule requête pour toutes les pochettes (évite le N+1)
-    list_ids = [user_list.id for user_list, _ in rows]
-    images = (
-        db.query(ListeItemModel.id_list, GameModel.image)
-        .join(GameModel, GameModel.id == ListeItemModel.id_item)
-        .filter(ListeItemModel.id_list.in_(list_ids))
-        .all()
-    )
-    previews: dict[int, list[str]] = {}
-    for list_id, image in images:
-        bucket = previews.setdefault(list_id, [])
-        if image and len(bucket) < 4:
-            bucket.append(image)
-
-    return [
-        {
-            "list_id": user_list.id,
-            "title": user_list.liste_title,
-            "owner": username,
-            "items_count": user_list.items_count or 0,
-            "preview": previews.get(user_list.id, []),
-        }
-        for user_list, username in rows
-    ]
 
 
 # =========================================================
@@ -223,9 +183,7 @@ def remove_item_from_list(
 # ROUTES PUBLIQUES (page Communauté, sans authentification)
 # Si la page doit être réservée aux connectés, ajouter :
 #   current_user: UserModel = Depends(get_current_user)
-# ATTENTION : /public/random et /public/search doivent rester
-# AVANT /public/{list_id}, sinon "random" / "search" seraient
-# lus comme un id (erreur 422).
+# ATTENTION : /public/random doit rester AVANT /public/{list_id}
 # =========================================================
 
 # ---------------------------------------------------------
@@ -233,55 +191,48 @@ def remove_item_from_list(
 # ---------------------------------------------------------
 @router.get("/public/random", response_model=list[PublicListOut])
 def get_random_public_lists(
-    limit: int = Query(8, ge=1, le=20),
+    limit: int = Query(6, ge=1, le=20),
     db: Session = Depends(get_db)
 ):
     """Tirer au hasard des listes publiques non vides."""
     # NB : func.random() fonctionne sur PostgreSQL et SQLite (MySQL : func.rand())
     rows = (
-        db.query(ListeModel, UserModel.username)
+        db.query(ListeModel, UserModel.id, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
         .filter(ListeModel.public.is_(True), ListeModel.items_count > 0)
         .order_by(func.random())
         .limit(limit)
         .all()
     )
-    return _serialize_public_lists(db, rows)
-
-
-# ---------------------------------------------------------
-# GET /api/lists/public/search?q=... : recherche de listes publiques
-# par nom de liste OU par nom d'utilisateur
-# ---------------------------------------------------------
-@router.get("/public/search", response_model=list[PublicListOut])
-def search_public_lists(
-    q: str = Query(..., min_length=2, max_length=50),
-    limit: int = Query(20, ge=1, le=50),
-    db: Session = Depends(get_db)
-):
-    """Chercher dans les listes publiques (jamais les privées) par titre ou par pseudo."""
-    term = q.strip()
-    if len(term) < 2:
+    if not rows:
         return []
 
-    pattern = f"%{_escape_like(term)}%"
-    rows = (
-        db.query(ListeModel, UserModel.username)
-        .join(UserModel, UserModel.id == ListeModel.users_id)
-        .filter(
-            # Le filtre "public" est dans la requête SQL : une liste privée ne peut pas sortir
-            ListeModel.public.is_(True),
-            ListeModel.items_count > 0,
-            or_(
-                ListeModel.liste_title.ilike(pattern, escape="\\"),
-                UserModel.username.ilike(pattern, escape="\\"),
-            ),
-        )
-        .order_by(ListeModel.created_at.desc(), ListeModel.id.desc())
-        .limit(limit)
+    # Une seule requête pour toutes les pochettes (évite le N+1)
+    list_ids = [user_list.id for user_list, _, _, _ in rows]
+    images = (
+        db.query(ListeItemModel.id_list, GameModel.image)
+        .join(GameModel, GameModel.id == ListeItemModel.id_item)
+        .filter(ListeItemModel.id_list.in_(list_ids))
         .all()
     )
-    return _serialize_public_lists(db, rows)
+    previews: dict[int, list[str]] = {}
+    for list_id, image in images:
+        bucket = previews.setdefault(list_id, [])
+        if image and len(bucket) < 4:
+            bucket.append(image)
+
+    return [
+        {
+            "list_id": user_list.id,
+            "title": user_list.liste_title,
+            "owner_id": owner_id,
+            "owner": username,
+            "owner_image_url": owner_image_url,
+            "items_count": user_list.items_count or 0,
+            "preview": previews.get(user_list.id, []),
+        }
+        for user_list, owner_id, username, owner_image_url in rows
+    ]
 
 
 # ---------------------------------------------------------
@@ -291,7 +242,7 @@ def search_public_lists(
 def get_public_list(list_id: int, db: Session = Depends(get_db)):
     """Détail d'une liste publique. 404 si elle est privée ou inexistante (on ne révèle rien)."""
     row = (
-        db.query(ListeModel, UserModel.username)
+        db.query(ListeModel, UserModel.id, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
         .filter(ListeModel.id == list_id, ListeModel.public.is_(True))
         .first()
@@ -299,7 +250,7 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
     if not row:
         raise HTTPException(status_code=404, detail="Liste introuvable.")
 
-    user_list, username = row
+    user_list, owner_id, username, owner_image_url = row
     games = (
         db.query(GameModel)
         .join(ListeItemModel, ListeItemModel.id_item == GameModel.id)
@@ -310,7 +261,9 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
     return {
         "list_id": user_list.id,
         "title": user_list.liste_title,
+        "owner_id": owner_id,
         "owner": username,
+        "owner_image_url": owner_image_url,
         "items_count": len(games),
         "games": [{"id": g.id, "titre": g.titre, "image": g.image} for g in games],
     }
