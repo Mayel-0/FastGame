@@ -400,3 +400,34 @@ def delete_list(
     db.commit()
 
     return None
+
+
+@router.get("/public/search", response_model=list[PublicListOut])
+def search_public_lists(
+    q: str = Query(..., min_length=2, max_length=50),
+    limit: int = Query(20, ge=1, le=50),
+    db: Session = Depends(get_db)
+):
+    """Chercher dans les listes publiques (jamais les privées) par titre ou par pseudo."""
+    term = q.strip()
+    if len(term) < 2:
+        return []
+
+    pattern = f"%{_escape_like(term)}%"
+    rows = (
+        db.query(ListeModel, UserModel.username)
+        .join(UserModel, UserModel.id == ListeModel.users_id)
+        .filter(
+            # Le filtre "public" est dans la requête SQL : une liste privée ne peut pas sortir
+            ListeModel.public.is_(True),
+            ListeModel.items_count > 0,
+            or_(
+                ListeModel.liste_title.ilike(pattern, escape="\\"),
+                UserModel.username.ilike(pattern, escape="\\"),
+            ),
+        )
+        .order_by(ListeModel.created_at.desc(), ListeModel.id.desc())
+        .limit(limit)
+        .all()
+    )
+    return _serialize_public_lists(db, rows)
