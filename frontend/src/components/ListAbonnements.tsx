@@ -20,7 +20,7 @@ function ListAbonnements({ users, followingMap, loading, onToggle }: propsListAb
             <UserIdentity
               userId={user.user.id}
               username={user.user.username ?? "Profil joueur"}
-              imageUrl={user.user.avatar}
+              imageUrl={user.user.image_url}
             />
             <FollowToggleButton
               userId={user.user.id}

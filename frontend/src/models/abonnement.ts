@@ -16,6 +16,6 @@ export interface AbonnementWithUser {
     id: number;
     username?: string;
     email?: string;
-    avatar?: string | null;
+    image_url?: string | null;
   };
 }
