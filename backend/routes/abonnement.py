@@ -53,6 +53,7 @@ def get_my_followers_with_users(
                 "id": user.id,
                 "username": getattr(user, "username", None),
                 "email": getattr(user, "email", None),
+                "image_url": user.image_url,
             }
         })
 
@@ -100,6 +101,7 @@ def get_my_following_with_users(
                 "id": user.id,
                 "username": getattr(user, "username", None),
                 "email": getattr(user, "email", None),
+                "image_url": user.image_url,
             }
         })
 
