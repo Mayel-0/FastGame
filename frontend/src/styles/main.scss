@@ -22,4 +22,10 @@
 @use './pages/details-game';
 @use './pages/listes' as pageListes;
 @use './pages/community';
+<<<<<<< HEAD
 @use './components/community-public-lists';
+=======
+@use './pages/abonnement';
+@use './components/abonnement-list';
+@use './components/follow-toggle';
+>>>>>>> 1-ajouts-potentiels

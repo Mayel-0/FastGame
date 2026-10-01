@@ -48,6 +48,10 @@
 		color: var(--color-copy);
 	}
 
+	&__heading > .follow-toggle {
+		margin-top: 1rem;
+	}
+
 	&__fields {
 		display: grid;
 		gap: 1rem;

@@ -18,6 +18,7 @@ from routes.lists import router as lists_router
 from routes.favoris import router as favoris_router
 from routes.steam import router as steam_router
 from routes.avatar import router as avatar_router, MEDIA_DIR
+from routes.abonnement import router as abonnements_router
 
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
@@ -77,7 +78,7 @@ app.include_router(lists_router)
 app.include_router(favoris_router)
 app.include_router(steam_router)
 app.include_router(avatar_router)
-
+app.include_router(abonnements_router)
 # Fichiers statiques : avatar par défaut et photos de profil (backend/media/)
 # Placé après les routers, sous /api pour passer par le même proxy nginx que l'API
 app.mount("/api/media", StaticFiles(directory=MEDIA_DIR), name="media")

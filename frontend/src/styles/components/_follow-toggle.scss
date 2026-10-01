@@ -1,0 +1,70 @@
+.follow-toggle {
+	display: grid;
+	justify-items: start;
+	gap: .35rem;
+	min-width: 0;
+
+	&__button {
+		min-height: 2.5rem;
+		padding: .55rem .85rem;
+		border: 1px solid var(--color-ink);
+		background: var(--color-ink);
+		color: var(--color-paper);
+		font-family: var(--font-ui);
+		font-size: .8rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background-color .18s ease, color .18s ease;
+
+		&:hover:not(:disabled) {
+			background: var(--color-coral);
+			border-color: var(--color-coral);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--color-coral);
+			outline-offset: 3px;
+		}
+
+		&:disabled {
+			cursor: wait;
+			opacity: .65;
+		}
+
+		&--following {
+			background: transparent;
+			color: var(--color-ink);
+		}
+	}
+
+	&__error {
+		color: var(--color-danger);
+		font-family: var(--font-ui);
+		font-size: .72rem;
+	}
+}
+
+.abonnement-list__item {
+	justify-content: space-between;
+	gap: .75rem;
+
+	.user-identity {
+		flex: 1 1 auto;
+	}
+
+	.follow-toggle {
+		flex: 0 0 auto;
+	}
+}
+
+@media (max-width: 420px) {
+	.abonnement-list__item {
+		align-items: flex-start;
+		flex-direction: column;
+
+		.follow-toggle,
+		.follow-toggle__button {
+			width: 100%;
+		}
+	}
+}

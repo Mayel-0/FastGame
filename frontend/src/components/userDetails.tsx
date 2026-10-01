@@ -4,7 +4,8 @@ import AvatarUploader from "./avatarUpload";
 import { useAuth } from "../context/AuthContext";
 import type Profil from "../models/profil";
 import { resolveMediaUrl } from "../utils/media";
-import type {LikeWithGame} from "../models/likes";
+import { useAbonnements } from "../hooks/useAbonnement";
+import FollowToggleButton from "./FollowToggleButton";
 
 interface UserDetailsProps {
   profil: Profil;
@@ -13,6 +14,19 @@ interface UserDetailsProps {
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
+function PublicProfileFollowAction({ userId }: { userId: number }) {
+  const { followingMap, loading, toggleFollow } = useAbonnements();
+
+  return (
+    <FollowToggleButton
+      userId={userId}
+      isFollowing={Boolean(followingMap[userId])}
+      disabled={loading}
+      onToggle={toggleFollow}
+    />
+  );
+}
 
 function UserDetails({ profil, currentUser }: UserDetailsProps) {
   const { authFetch } = useAuth();
@@ -52,6 +66,7 @@ function UserDetails({ profil, currentUser }: UserDetailsProps) {
           <p className="profile-details__eyebrow">{isMe ? "Mon profil" : "Profil joueur"}</p>
           <h1 id="profile-title">{profile.username}</h1>
           <p className="profile-details__status">{isMe ? "Gérez vos informations personnelles." : "Profil public en lecture seule."}</p>
+          {!isMe && currentUser && <PublicProfileFollowAction userId={profile.id} />}
         </div>
         {isMe && (
           <AvatarUploader
