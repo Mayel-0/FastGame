@@ -9,7 +9,6 @@ function Footer() {
           <p className="footer__tagline">Trouve ton prochain monde a explorer.</p>
         </div>
         <nav className="footer__navigation" aria-label="Navigation secondaire">
-          <Link className="footer__link" to="/">Accueil</Link>
         </nav>
       </div>
       <div className="footer__bottom">

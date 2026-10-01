@@ -1,11 +1,11 @@
-export default interface Like {
+export interface Like {
   id: number;
   user_id: number;
   game_id: number;
   created_at: string;
 }
 
-export default interface LikeWithGame {
+export interface LikeWithGame {
   id: number;
   user_id: number;
   game_id: number;

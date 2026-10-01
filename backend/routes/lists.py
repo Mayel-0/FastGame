@@ -190,6 +190,70 @@ def remove_item_from_list(
 # ---------------------------------------------------------
 # GET /api/lists/public/random : listes publiques aléatoires
 # ---------------------------------------------------------
+
+
+# ---------------------------------------------------------
+# GET /api/lists/user/{user_id} : listes publiques d'un utilisateur
+# ---------------------------------------------------------
+@router.get("/user/{user_id}", response_model=list[PublicListOut])
+def get_public_lists_by_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Obtenir toutes les listes publiques non vides d'un utilisateur spécifique."""
+    # 1. Vérifier si l'utilisateur existe
+    owner = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not owner:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Utilisateur introuvable."
+        )
+
+    # 2. Récupérer uniquement les listes publiques de cet utilisateur
+    rows = (
+        db.query(ListeModel)
+        .filter(
+            ListeModel.users_id == user_id,
+            ListeModel.public.is_(True),
+            ListeModel.items_count > 0
+        )
+        .order_by(ListeModel.created_at.desc())
+        .all()
+    )
+
+    if not rows:
+        return []
+
+    # 3. Récupérer les 4 premières images de couverture par liste en 1 seule requête
+    list_ids = [user_list.id for user_list in rows]
+    images = (
+        db.query(ListeItemModel.id_list, GameModel.image)
+        .join(GameModel, GameModel.id == ListeItemModel.id_item)
+        .filter(ListeItemModel.id_list.in_(list_ids))
+        .all()
+    )
+
+    previews: dict[int, list[str]] = {}
+    for list_id, image in images:
+        bucket = previews.setdefault(list_id, [])
+        if image and len(bucket) < 4:
+            bucket.append(image)
+
+    # 4. Formater selon le schéma PublicListOut
+    return [
+        {
+            "list_id": user_list.id,
+            "title": user_list.liste_title,
+            "owner_id": owner.id,
+            "owner": owner.username,
+            "owner_image_url": owner.image_url,
+            "items_count": user_list.items_count or 0,
+            "preview": previews.get(user_list.id, []),
+        }
+        for user_list in rows
+    ]
+
+
 @router.get("/public/random", response_model=list[PublicListOut])
 def get_random_public_lists(
     limit: int = Query(6, ge=1, le=20),
@@ -244,27 +308,29 @@ def _escape_like(value: str) -> str:
 # GET /api/lists/public/search?q=... : listes publiques par titre OU par pseudo
 @router.get("/public/search", response_model=list[PublicListOut])
 def search_public_lists(
-    q: str = Query(..., min_length=2, max_length=50),
+    q: str | None = Query(None, min_length=2, max_length=50),
     limit: int = Query(20, ge=1, le=50),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
-    term = q.strip()
-    if len(term) < 2:
+    term = q.strip() if q else ""
+    if q is not None and len(term) < 2:
         return []
 
-    pattern = f"%{_escape_like(term)}%"
+    filters = [ListeModel.public.is_(True), ListeModel.items_count > 0]
+    if term:
+        pattern = f"%{_escape_like(term)}%"
+        filters.append(or_(
+            ListeModel.liste_title.ilike(pattern, escape="\\"),
+            UserModel.username.ilike(pattern, escape="\\"),
+        ))
+
     rows = (
-        db.query(ListeModel, UserModel.username)
+        db.query(ListeModel, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
-        .filter(
-            ListeModel.public.is_(True),  # une liste privée ne peut jamais sortir
-            ListeModel.items_count > 0,
-            or_(
-                ListeModel.liste_title.ilike(pattern, escape="\\"),
-                UserModel.username.ilike(pattern, escape="\\"),
-            ),
-        )
+        .filter(*filters)
         .order_by(ListeModel.created_at.desc(), ListeModel.id.desc())
+        .offset(offset)
         .limit(limit)
         .all()
     )
@@ -272,7 +338,7 @@ def search_public_lists(
         return []
 
     # Une seule requête pour les pochettes (4 max par liste)
-    list_ids = [user_list.id for user_list, _ in rows]
+    list_ids = [user_list.id for user_list, _, _ in rows]
     images = (
         db.query(ListeItemModel.id_list, GameModel.image)
         .join(GameModel, GameModel.id == ListeItemModel.id_item)
@@ -291,10 +357,11 @@ def search_public_lists(
             "title": user_list.liste_title,
             "owner": username,
             "owner_id": user_list.users_id,
+            "owner_image_url": owner_image_url,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
         }
-        for user_list, username in rows
+        for user_list, username, owner_image_url in rows
     ]
 
 # ---------------------------------------------------------

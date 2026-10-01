@@ -1,7 +1,7 @@
 import { useTopRatedGames } from "../hooks/useTopRatedGames";
 import { useWorstRatedGames } from "../hooks/useWorstRatedGames";
 import PageLoader from "../components/pageLoader";
-import { useRandomPublicLists } from "../hooks/useRandomPublicLists";
+import { usePublicLists } from "../hooks/usePublicLists";
 import { useMostLikedGames } from "../hooks/useMostLikedGames";
 import CommunityRanking from "../components/CommunityRanking";
 import CommunityPublicLists from "../components/CommunityPublicLists";
@@ -9,11 +9,19 @@ import CommunityPublicLists from "../components/CommunityPublicLists";
 function CommuPage() {
   const { data: topGames, loading: loadingTopGames, error: topGamesError } = useTopRatedGames(5);
   const { data: worstGames, loading: loadingWorstGames, error: worstGamesError } = useWorstRatedGames(5);
-  const { data: publicLists, loading: loadingPublicLists, error: publicListsError } = useRandomPublicLists();
+  const {
+    data: publicLists,
+    loading: loadingPublicLists,
+    error: publicListsError,
+    query: listQuery,
+    setQuery: setListQuery,
+    hasMore: hasMorePublicLists,
+    loadMore: loadMorePublicLists,
+  } = usePublicLists();
   const { data: mostLikedGames, loading: loadingMostLikedGames, error: mostLikedGamesError } = useMostLikedGames(5);
 
-  const isLoading = [loadingTopGames, loadingWorstGames, loadingPublicLists, loadingMostLikedGames].some(Boolean);
-  const errors = [topGamesError, worstGamesError, publicListsError, mostLikedGamesError].filter(Boolean);
+  const isLoading = [loadingTopGames, loadingWorstGames, loadingMostLikedGames].some(Boolean);
+  const errors = [topGamesError, worstGamesError, mostLikedGamesError].filter(Boolean);
 
   return (
     <main className="community-page">
@@ -39,7 +47,15 @@ function CommuPage() {
             <CommunityRanking title="Les plus aimés" eyebrow="Plébiscités" games={mostLikedGames} metric="likes" />
             <CommunityRanking title="À débattre" eyebrow="Les moins notés" games={worstGames} metric="rating" />
           </div>
-          <CommunityPublicLists lists={publicLists} />
+          <CommunityPublicLists
+            lists={publicLists}
+            loading={loadingPublicLists}
+            error={publicListsError}
+            query={listQuery}
+            onQueryChange={setListQuery}
+            hasMore={hasMorePublicLists}
+            onLoadMore={loadMorePublicLists}
+          />
         </div>
       </PageLoader>
     </main>

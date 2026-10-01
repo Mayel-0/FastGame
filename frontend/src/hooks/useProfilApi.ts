@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type Game from "../models/game";
-import type LikeWithGame from "../models/likes";
+import type { LikeWithGame } from "../models/likes";
 
 const useLikesByUser = () => {
   const { authFetch } = useAuth();

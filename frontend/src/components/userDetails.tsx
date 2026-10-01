@@ -4,10 +4,12 @@ import AvatarUploader from "./avatarUpload";
 import { useAuth } from "../context/AuthContext";
 import type Profil from "../models/profil";
 import { resolveMediaUrl } from "../utils/media";
+import type {LikeWithGame} from "../models/likes";
 
 interface UserDetailsProps {
   profil: Profil;
   currentUser: Profil | null;
+  likes: LikeWithGame[];
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
