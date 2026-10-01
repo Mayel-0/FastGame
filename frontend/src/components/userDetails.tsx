@@ -6,6 +6,7 @@ import type Profil from "../models/profil";
 import { resolveMediaUrl } from "../utils/media";
 import { useAbonnements } from "../hooks/useAbonnement";
 import FollowToggleButton from "./FollowToggleButton";
+import type { LikeWithGame } from "../models/likes";
 
 interface UserDetailsProps {
   profil: Profil;
