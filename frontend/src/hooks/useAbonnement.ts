@@ -121,6 +121,7 @@ export const useAbonnements = () => {
 
       setFollowing((prev) => [...prev, newAbonnement]);
       setFollowingMap((prev) => ({ ...prev, [followId]: true }));
+      await fetchFollowingDetails();
       return true;
     } catch (err) {
       setError((err as Error).message);

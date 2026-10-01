@@ -22,3 +22,6 @@
 @use './pages/details-game';
 @use './pages/listes' as pageListes;
 @use './pages/community';
+@use './pages/abonnement';
+@use './components/abonnement-list';
+@use './components/follow-toggle';

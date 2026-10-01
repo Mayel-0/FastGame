@@ -1,0 +1,102 @@
+.abonnement-page {
+	min-height: 70vh;
+	padding-bottom: 4rem;
+	background: var(--color-page);
+
+	&__hero {
+		padding: 3.75rem max(1.25rem, calc((100% - var(--content-width)) / 2)) 3rem;
+		background: linear-gradient(115deg, var(--color-ink), #345354);
+		color: var(--color-paper);
+	}
+
+	&__eyebrow,
+	&__section-label {
+		margin: 0 0 .6rem;
+		color: #f0a084;
+		font-family: var(--font-ui);
+		font-size: .72rem;
+		font-weight: 700;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: clamp(2.25rem, 6vw, 4rem);
+		line-height: 1.05;
+	}
+
+	&__intro {
+		max-width: 38rem;
+		margin: 1rem 0 0;
+		color: #dfe7e5;
+		font-size: 1.05rem;
+		line-height: 1.6;
+	}
+
+	&__content {
+		width: min(100% - 2.5rem, 70rem);
+		margin: 0 auto;
+	}
+
+	&__section {
+		padding: 2.25rem 0;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	&__section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+	}
+
+	&__section-label {
+		margin-bottom: .35rem;
+		color: var(--color-coral);
+	}
+
+	&__section-title {
+		margin: 0;
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: 1.65rem;
+	}
+
+	&__count {
+		display: grid;
+		flex: 0 0 auto;
+		place-items: center;
+		min-width: 2.5rem;
+		min-height: 2.5rem;
+		padding: 0 .65rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-paper);
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: .9rem;
+		font-weight: 700;
+	}
+}
+
+@media (max-width: 600px) {
+	.abonnement-page {
+		&__hero {
+			padding: 2.75rem 1rem 2.25rem;
+		}
+
+		&__content {
+			width: min(100% - 2rem, 70rem);
+		}
+
+		&__section {
+			padding: 1.75rem 0;
+		}
+
+		&__section-title {
+			font-size: 1.4rem;
+		}
+	}
+}

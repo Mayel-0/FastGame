@@ -1,0 +1,37 @@
+.abonnement-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+	gap: .8rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	&__item {
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		min-height: 4rem;
+		padding: .85rem 1rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-paper);
+		box-shadow: 3px 3px 0 var(--color-teal-soft);
+	}
+
+	&__name {
+		overflow: hidden;
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: .95rem;
+		font-weight: 700;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__empty {
+		grid-column: 1 / -1;
+		padding: 1.25rem;
+		border-left: 3px solid var(--color-coral);
+		background: var(--color-paper);
+		color: var(--color-copy);
+	}
+}
