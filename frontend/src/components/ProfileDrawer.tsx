@@ -1,4 +1,4 @@
-import { Heart, Star, UserRound, X, ListStart } from "lucide-react";
+import { Heart, Star, UserRound, X, ListStart, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UserIdentity from "./UserIdentity";
@@ -37,6 +37,10 @@ function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
           <Link className="profile-drawer__link" to={user ? `/profil/${user.id}` : "/profil"} onClick={onClose}>
             <UserRound size={20} aria-hidden="true" />
             <span>Mon profil</span>
+          </Link>
+          <Link className="profile-drawer__link" to="/abonnements" onClick={onClose}>
+            <Users size={20} aria-hidden="true" />
+            <span>Mes abonnements</span>
           </Link>
           <Link className="profile-drawer__link" to="/listes/likes" onClick={onClose}>
             <Heart size={20} aria-hidden="true" />

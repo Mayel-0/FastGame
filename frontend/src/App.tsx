@@ -11,12 +11,14 @@ import Notfound from './views/NotFound';
 import PageDetailsgame from './views/PageDetailsGame';
 import PageListe from './views/PageListe';
 import CommuPage from './views/CommuPage';
+import AbonnementPage from './views/AbonnementPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
       <Routes>
+        <Route path='/abonnements' element={<AbonnementPage/>} />
         <Route path='/listes' element={<PageListe/>} />
         <Route path='/commu' element={<CommuPage/>} />
         <Route path='/jeux/d/:slug' element={<PageDetailsgame />} />
