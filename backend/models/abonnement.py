@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, func
 
 
 class Abonnement(Base):
-    __tablename__ = "abonnements"
+    __tablename__ = "abonnement"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"),nullable=False)
@@ -21,6 +21,25 @@ class AbonnementResponseSchema(BaseModel):
     user_id: int
     follow_id: int
     abonned_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserSimpleSchema(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        from_attributes = True
+
+
+class AbonnementDetailResponseSchema(BaseModel):
+    id: int
+    user_id: int
+    follow_id: int
+    abonned_at: datetime
+    followed_user: UserSimpleSchema | None = None  # Infos du compte suivi
+    follower_user: UserSimpleSchema | None = None  # Infos de l'abonné
 
     class Config:
         from_attributes = True

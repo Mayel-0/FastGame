@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from db.database import get_db
 from models.users import UserModel
@@ -7,11 +7,103 @@ from models.abonnement import (
     Abonnement as AbonnementModel,
     AbonnementCreateSchema,
     AbonnementResponseSchema,
+    AbonnementDetailResponseSchema
 )
 from routes.users import get_current_user
 
 router = APIRouter(prefix="/api/abonnements", tags=["abonnements"])
 
+# ---------------------------------------------------------
+# 1. GET /api/abonnements/me/following - Mes abonnements (Comptes que je suis)
+# ---------------------------------------------------------
+@router.get("/me/following", response_model=list[AbonnementResponseSchema])
+def get_my_following(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Récupère la liste de tous les abonnements de l'utilisateur connecté."""
+    following = db.query(AbonnementModel).filter(
+        AbonnementModel.user_id == current_user.id
+    ).all()
+
+    return following
+
+# ---------------------------------------------------------
+# GET /api/abonnements/me/followers/details - Avec les détails des abonnés
+# ---------------------------------------------------------
+@router.get("/me/followers/details")
+def get_my_followers_with_users(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Récupère les abonnés avec les données de profil des personnes qui me suivent."""
+    results = (
+        db.query(AbonnementModel, UserModel)
+        .join(UserModel, AbonnementModel.user_id == UserModel.id)  # On joint sur user_id (celui qui s'est abonné)
+        .filter(AbonnementModel.follow_id == current_user.id)
+        .all()
+    )
+
+    followers_list = []
+    for abonn, user in results:
+        followers_list.append({
+            "abonnement_id": abonn.id,
+            "abonned_at": abonn.abonned_at,
+            "user": {
+                "id": user.id,
+                "username": getattr(user, "username", None),
+                "email": getattr(user, "email", None),
+            }
+        })
+
+    return followers_list
+
+
+# ---------------------------------------------------------
+# 2. GET /api/abonnements/me/followers - Mes abonnés (Personnes qui me suivent)
+# ---------------------------------------------------------
+@router.get("/me/followers", response_model=list[AbonnementResponseSchema])
+def get_my_followers(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Récupère la liste de tous les abonnés de l'utilisateur connecté."""
+    followers = db.query(AbonnementModel).filter(
+        AbonnementModel.follow_id == current_user.id
+    ).all()
+
+    return followers
+
+
+# ---------------------------------------------------------
+# 3. GET /api/abonnements/me/following/details - Avec les détails des utilisateurs suivis
+# ---------------------------------------------------------
+@router.get("/me/following/details")
+def get_my_following_with_users(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Récupère les abonnements avec les données du profil de la personne suivie."""
+    results = (
+        db.query(AbonnementModel, UserModel)
+        .join(UserModel, AbonnementModel.follow_id == UserModel.id)
+        .filter(AbonnementModel.user_id == current_user.id)
+        .all()
+    )
+
+    following_list = []
+    for abonn, user in results:
+        following_list.append({
+            "abonnement_id": abonn.id,
+            "abonned_at": abonn.abonned_at,
+            "user": {
+                "id": user.id,
+                "username": getattr(user, "username", None),
+                "email": getattr(user, "email", None),
+            }
+        })
+
+    return following_list
 
 # ---------------------------------------------------------
 # 1. POST /api/abonnements/ - S'abonner à un utilisateur
