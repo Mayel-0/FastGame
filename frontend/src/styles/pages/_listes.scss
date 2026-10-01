@@ -112,4 +112,12 @@
 	.page-liste__form {
 		grid-template-columns: 1fr;
 	}
+
+	.page-liste__toggle {
+		justify-content: flex-start;
+	}
+
+	.page-liste__submit {
+		width: 100%;
+	}
 }

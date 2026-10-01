@@ -210,6 +210,7 @@
 			font-family: var(--font-ui);
 			text-overflow: ellipsis;
 			white-space: nowrap;
+			word-break: break-word;
 		}
 	}
 
@@ -223,6 +224,16 @@
 
 		&:hover {
 			text-decoration: underline;
+		}
+	}
+
+	@media (max-width: 560px) {
+		&__body {
+			padding: 1rem;
+		}
+
+		&__details {
+			grid-template-columns: 1fr;
 		}
 	}
 }

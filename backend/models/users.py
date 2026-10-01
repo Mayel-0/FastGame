@@ -14,7 +14,7 @@ class UserModel(Base):
     password = Column(String, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     bio = Column(String, nullable=True)
-    image_url = Column(String, nullable=True, server_default="/api/media/default-avatar.svg")
+    image_url = Column(String, nullable=True, server_default="/api/media/default-avatar.png")
 
     steam_account = relationship("SteamAccountModel", back_populates="user", uselist=False)  # ← ajout
 

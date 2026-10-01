@@ -45,6 +45,7 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Ou ["*"] pour tout autoriser
+    allow_origin_regex=None if is_production else r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],    # Autorise toutes les méthodes (GET, POST, etc.)
     allow_headers=["*"],    # Autorise tous les headers
