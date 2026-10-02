@@ -1,6 +1,60 @@
-.profile-details {
-	width: min(100% - 2.5rem, 52rem);
+.profile-page {
 	min-height: 70vh;
+	padding-bottom: 4rem;
+	background: var(--color-page);
+
+	&__games,
+	> .community-lists {
+		width: min(100% - 2.5rem, var(--content-width));
+		margin: 0 auto;
+	}
+
+	&__games {
+		padding: 2.5rem 0 3rem;
+		border-top: 1px solid var(--color-line);
+	}
+
+	&__section-header {
+		margin-bottom: 1.5rem;
+	}
+
+	&__eyebrow {
+		margin: 0 0 .4rem;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .72rem;
+		font-weight: 700;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+	}
+
+	&__section-title {
+		margin: 0;
+		color: var(--color-ink);
+		font-family: var(--font-ui);
+		font-size: clamp(1.7rem, 4vw, 2.5rem);
+	}
+
+	&__empty {
+		margin: 0;
+		padding: 1.25rem;
+		border-left: 3px solid var(--color-coral);
+		background: var(--color-paper);
+		color: var(--color-copy);
+	}
+
+	.game-list {
+		width: 100%;
+	}
+
+	.community-lists {
+		padding-top: 2rem;
+		border-top: 1px solid var(--color-line);
+	}
+}
+
+.profile-details {
+	width: min(100% - 2.5rem, 58rem);
 	margin: 0 auto;
 	padding: 4rem 0;
 
@@ -24,6 +78,7 @@
 	}
 
 	&__heading {
+	min-width: 0;
 		padding-bottom: 0;
 	}
 
@@ -145,8 +200,17 @@
 
 @media (max-width: 520px) {
 	.profile-details {
-		width: min(100% - 2rem, 52rem);
-		padding: 2.5rem 0;
+		width: min(100% - 2rem, 58rem);
+		padding: 2.5rem 0 2rem;
+	}
+
+	.profile-page__games,
+	.profile-page > .community-lists {
+		width: min(100% - 2rem, var(--content-width));
+	}
+
+	.profile-page__games {
+		padding: 1.75rem 0 2rem;
 	}
 
 	.profile-field__display,

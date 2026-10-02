@@ -43,11 +43,19 @@ function ProfilPage() {
           <p role="alert">{error ?? "Profil introuvable."}</p>
         </main>
       ) : !isLoading && user ? (
-        <main>
+        <main className="profile-page">
           <UserDetails profil={user} currentUser={currentUser} likes={LikeUser}/>
-          <h3>Likes</h3>
-          <hr/>
-          <GameList onToggleLike={toggleLike} likes={likes} games={Games} />
+          <section className="profile-page__games" aria-labelledby="profile-games-title">
+            <header className="profile-page__section-header">
+              <p className="profile-page__eyebrow">Sa collection</p>
+              <h2 className="profile-page__section-title" id="profile-games-title">Jeux aimés</h2>
+            </header>
+            {Games.length > 0 ? (
+              <GameList onToggleLike={toggleLike} likes={likes} games={Games} />
+            ) : (
+              <p className="profile-page__empty">Aucun jeu aimé à afficher pour le moment.</p>
+            )}
+          </section>
           <CommunityPublicLists lists={ListUser}/>
         </main>
       ) : null}
