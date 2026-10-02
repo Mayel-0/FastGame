@@ -1,13 +1,23 @@
 import ListesList from "../components/Listelist";
 import useUserLists from "../hooks/useUserLists";
 import PageLoader from "../components/pageLoader";
+import { useMyLikedLists } from "../hooks/Usemylikedlists";
+import { useToggleListLike } from "../hooks/useTogglelistlike";
 import { useState } from "react";
 
 function PageListe() {
   const { joinedLists, loading, createList, updateList } = useUserLists();
-  const isLoading = [loading].some(Boolean);
   const [newListTitle, setNewListTitle] = useState<string>("");
   const [isPublic, setIsPublic] = useState<boolean>(true);
+  const {
+    lists: likedLists,
+    loading: likedListsLoading,
+    error: likedListsError,
+    removeList,
+  } = useMyLikedLists();
+  const { likeStates, toggle } = useToggleListLike();
+
+  const isLoading = [loading, likedListsLoading].some(Boolean);
 
   const formattedLists = joinedLists.map((item) => ({
     id: item.list_id,
@@ -26,6 +36,16 @@ function PageListe() {
     if (success) {
       setNewListTitle("");
     }
+  };
+
+  const handleToggleLikedList = async (
+    listId: number,
+    initialLiked = false,
+    initialCount = 0,
+  ) => {
+    const success = await toggle(listId, initialLiked, initialCount);
+    if (success && initialLiked) removeList(listId);
+    return success;
   };
 
   return (
@@ -63,7 +83,15 @@ function PageListe() {
           <button className="page-liste__submit" type="submit">Créer la liste</button>
         </form>
 
-        <ListesList listes={formattedLists} updateList={updateList} />
+        <ListesList
+          listes={formattedLists}
+          updateList={updateList}
+          likedLists={likedLists}
+          likeStates={likeStates}
+          onToggleLikedList={handleToggleLikedList}
+        />
+        {likedListsError && <p className="page-liste__error" role="alert">Impossible de charger vos listes likées.</p>}
+        {likedListsLoading && <p className="page-liste__status" aria-live="polite">Chargement de vos listes likées…</p>}
       </PageLoader>
     </main>
   );

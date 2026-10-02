@@ -88,6 +88,7 @@ class PublicListOut(BaseModel):
     owner_image_url: str | None = None
     items_count: int
     preview: list[str]
+    likes_count: int = 0
 
 
 class PublicListDetailOut(BaseModel):

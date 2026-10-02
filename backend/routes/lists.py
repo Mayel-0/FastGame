@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from models.game import GameModel
+from models.likes_list import ListeLikeModel
 from models.lists import (
     ListeCreateSchema,
     ListeItemModel,
@@ -23,6 +24,19 @@ router = APIRouter(
     prefix="/api/lists",
     tags=["Lists"]
 )
+
+
+def _get_list_like_counts(db: Session, list_ids: list[int]) -> dict[int, int]:
+    if not list_ids:
+        return {}
+
+    rows = (
+        db.query(ListeLikeModel.liste_id, func.count(ListeLikeModel.user_id))
+        .filter(ListeLikeModel.liste_id.in_(list_ids))
+        .group_by(ListeLikeModel.liste_id)
+        .all()
+    )
+    return dict(rows)
 
 
 # =========================================================
@@ -226,6 +240,7 @@ def get_public_lists_by_user(
 
     # 3. Récupérer les 4 premières images de couverture par liste en 1 seule requête
     list_ids = [user_list.id for user_list in rows]
+    like_counts = _get_list_like_counts(db, list_ids)
     images = (
         db.query(ListeItemModel.id_list, GameModel.image)
         .join(GameModel, GameModel.id == ListeItemModel.id_item)
@@ -249,6 +264,7 @@ def get_public_lists_by_user(
             "owner_image_url": owner.image_url,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
+            "likes_count": like_counts.get(user_list.id, 0),
         }
         for user_list in rows
     ]
@@ -274,6 +290,7 @@ def get_random_public_lists(
 
     # Une seule requête pour toutes les pochettes (évite le N+1)
     list_ids = [user_list.id for user_list, _, _, _ in rows]
+    like_counts = _get_list_like_counts(db, list_ids)
     images = (
         db.query(ListeItemModel.id_list, GameModel.image)
         .join(GameModel, GameModel.id == ListeItemModel.id_item)
@@ -295,6 +312,7 @@ def get_random_public_lists(
             "owner_image_url": owner_image_url,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
+            "likes_count": like_counts.get(user_list.id, 0),
         }
         for user_list, owner_id, username, owner_image_url in rows
     ]
@@ -339,6 +357,7 @@ def search_public_lists(
 
     # Une seule requête pour les pochettes (4 max par liste)
     list_ids = [user_list.id for user_list, _, _ in rows]
+    like_counts = _get_list_like_counts(db, list_ids)
     images = (
         db.query(ListeItemModel.id_list, GameModel.image)
         .join(GameModel, GameModel.id == ListeItemModel.id_item)
@@ -360,6 +379,7 @@ def search_public_lists(
             "owner_image_url": owner_image_url,
             "items_count": user_list.items_count or 0,
             "preview": previews.get(user_list.id, []),
+            "likes_count": like_counts.get(user_list.id, 0),
         }
         for user_list, username, owner_image_url in rows
     ]

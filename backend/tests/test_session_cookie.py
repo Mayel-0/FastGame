@@ -14,6 +14,7 @@ from sqlalchemy.pool import StaticPool
 from main import app
 from db.database import Base
 from models.game import GameModel
+from models.likes_list import ListeLikeModel
 from models.lists import ListeItemModel, ListeModel
 from models.notes import NoteModel
 from models.users import UserModel
@@ -98,6 +99,7 @@ class JwtAuthTests(unittest.TestCase):
         db.commit()
         db.refresh(game)
         db.add(ListeItemModel(id_list=public_list.id, id_item=game.id, id_user=self.user_id))
+        db.add(ListeLikeModel(user_id=self.user_id, liste_id=public_list.id))
         db.commit()
         db.close()
 
@@ -109,6 +111,11 @@ class JwtAuthTests(unittest.TestCase):
         self.assertEqual(response.json()[0]["owner_id"], self.user_id)
         self.assertEqual(response.json()[0]["owner"], "alice")
         self.assertEqual(response.json()[0]["owner_image_url"], "/api/media/avatars/alice.webp")
+        self.assertEqual(response.json()[0]["likes_count"], 1)
+
+        search_response = client.get("/api/lists/public/search")
+        self.assertEqual(search_response.status_code, 200, search_response.text)
+        self.assertEqual(search_response.json()[0]["likes_count"], 1)
 
     def test_game_notes_include_author_profile_image(self):
         db = self.SessionLocal()

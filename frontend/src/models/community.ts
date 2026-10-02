@@ -10,9 +10,17 @@ export interface RankedGame {
 export interface PublicList {
   list_id: number;
   title: string;
-  owner_id: number;
   owner: string;
-  owner_image_url: string | null;
+  owner_id: number;
+  owner_image_url?: string | null;
   items_count: number;
   preview: string[];
+  likes_count?: number;
+  liked_by_me?: boolean;
+}
+
+export interface LikedList extends PublicList {
+  likes_count: number;
+  liked_by_me: boolean;
+  liked_at: string | null;
 }

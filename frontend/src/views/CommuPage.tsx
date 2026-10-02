@@ -5,6 +5,8 @@ import { usePublicLists } from "../hooks/usePublicLists";
 import { useMostLikedGames } from "../hooks/useMostLikedGames";
 import CommunityRanking from "../components/CommunityRanking";
 import CommunityPublicLists from "../components/CommunityPublicLists";
+import { useToggleListLike } from "../hooks/useTogglelistlike";
+import { useMyLikedLists } from "../hooks/Usemylikedlists";
 
 function CommuPage() {
   const { data: topGames, loading: loadingTopGames, error: topGamesError } = useTopRatedGames(5);
@@ -19,9 +21,17 @@ function CommuPage() {
     loadMore: loadMorePublicLists,
   } = usePublicLists();
   const { data: mostLikedGames, loading: loadingMostLikedGames, error: mostLikedGamesError } = useMostLikedGames(5);
+  const { likeStates, toggle } = useToggleListLike();
+  const { lists: myLikedLists, loading: loadingMyLikedLists } = useMyLikedLists();
 
-  const isLoading = [loadingTopGames, loadingWorstGames, loadingMostLikedGames].some(Boolean);
+  const isLoading = [loadingTopGames, loadingWorstGames, loadingMostLikedGames, loadingMyLikedLists].some(Boolean);
   const errors = [topGamesError, worstGamesError, mostLikedGamesError].filter(Boolean);
+  const myLikedIds = new Set(myLikedLists.map((list) => list.list_id));
+  const communityLists = publicLists?.map((list) => ({
+    ...list,
+    liked_by_me: myLikedIds.has(list.list_id),
+    likes_count: list.likes_count ?? 0,
+  })) ?? null;
 
   return (
     <main className="community-page">
@@ -48,13 +58,15 @@ function CommuPage() {
             <CommunityRanking title="À débattre" eyebrow="Les moins notés" games={worstGames} metric="rating" />
           </div>
           <CommunityPublicLists
-            lists={publicLists}
+            lists={communityLists}
             loading={loadingPublicLists}
             error={publicListsError}
             query={listQuery}
             onQueryChange={setListQuery}
             hasMore={hasMorePublicLists}
             onLoadMore={loadMorePublicLists}
+            likeStates={likeStates}
+            onToggleLike={toggle}
           />
         </div>
       </PageLoader>

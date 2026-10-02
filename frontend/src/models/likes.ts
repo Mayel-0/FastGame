@@ -18,3 +18,8 @@ export interface LikeWithGame {
   image: string | null;
   url: string | null;
 }
+
+export interface LikeResponse {
+  liked: boolean;
+  likes_count: number;
+}

@@ -147,6 +147,66 @@
 		font-family: var(--font-ui);
 		font-size: .85rem;
 	}
+
+	&__meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: .75rem;
+		margin-top: .75rem;
+	}
+
+	&__like-button,
+	&__like-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: .45rem;
+		min-width: 2.75rem;
+		min-height: 2.5rem;
+		padding: .45rem .65rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-page);
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: .82rem;
+		font-weight: 700;
+	}
+
+	&__like-button {
+		cursor: pointer;
+		transition: color .18s ease, border-color .18s ease, background-color .18s ease;
+
+		&:hover:not(:disabled),
+		&[aria-pressed="true"] {
+			border-color: var(--color-coral);
+			background: #fff5f0;
+			color: var(--color-coral);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--color-coral);
+			outline-offset: 2px;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: .55;
+		}
+	}
+
+	&__like-count {
+		border-color: transparent;
+		background: transparent;
+		color: var(--color-muted);
+	}
+
+	&__error {
+		margin: .65rem 0 0;
+		color: var(--color-danger);
+		font-family: var(--font-ui);
+		font-size: .78rem;
+	}
 }
 
 @media (max-width: 700px) {
