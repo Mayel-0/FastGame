@@ -40,6 +40,13 @@ class PublicUserSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class TopUserSchema(BaseModel):
+    id: int
+    username: str
+    image_url: str | None = None
+    public_lists_count: int
+    likes_received: int
+
 class UserCreateSchema(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=8, max_length=72)

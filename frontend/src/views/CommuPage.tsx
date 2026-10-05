@@ -7,6 +7,8 @@ import CommunityRanking from "../components/CommunityRanking";
 import CommunityPublicLists from "../components/CommunityPublicLists";
 import { useToggleListLike } from "../hooks/useTogglelistlike";
 import { useMyLikedLists } from "../hooks/Usemylikedlists";
+import { useTopUsers } from "../hooks/useTopUsers";
+import CommunityTopUsers from "../components/CommunityTopUsers";
 
 function CommuPage() {
   const { data: topGames, loading: loadingTopGames, error: topGamesError } = useTopRatedGames(5);
@@ -23,8 +25,9 @@ function CommuPage() {
   const { data: mostLikedGames, loading: loadingMostLikedGames, error: mostLikedGamesError } = useMostLikedGames(5);
   const { likeStates, toggle } = useToggleListLike();
   const { lists: myLikedLists, loading: loadingMyLikedLists } = useMyLikedLists();
+  const { data: topUsers, loading: loadingTopUsers, error: topUsersError } = useTopUsers(5);
 
-  const isLoading = [loadingTopGames, loadingWorstGames, loadingMostLikedGames, loadingMyLikedLists].some(Boolean);
+  const isLoading = [loadingTopGames, loadingWorstGames, loadingMostLikedGames, loadingMyLikedLists, loadingTopUsers].some(Boolean);
   const errors = [topGamesError, worstGamesError, mostLikedGamesError].filter(Boolean);
   const myLikedIds = new Set(myLikedLists.map((list) => list.list_id));
   const communityLists = publicLists?.map((list) => ({
@@ -57,6 +60,7 @@ function CommuPage() {
             <CommunityRanking title="Les plus aimés" eyebrow="Plébiscités" games={mostLikedGames} metric="likes" />
             <CommunityRanking title="À débattre" eyebrow="Les moins notés" games={worstGames} metric="rating" />
           </div>
+          <CommunityTopUsers users={topUsers} loading={loadingTopUsers} error={topUsersError} />
           <CommunityPublicLists
             lists={communityLists}
             loading={loadingPublicLists}

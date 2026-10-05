@@ -24,3 +24,11 @@ export interface LikedList extends PublicList {
   liked_by_me: boolean;
   liked_at: string | null;
 }
+
+export interface TopUser {
+  id: number;
+  username: string;
+  image_url: string | null;
+  public_lists_count: number;
+  likes_received: number;
+}

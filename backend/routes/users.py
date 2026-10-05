@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy import and_, distinct, func
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
 from models.notes import NoteModel
-from models.users import PublicUserSchema, UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
+from models.likes_list import ListeLikeModel
+from models.lists import ListeModel
+from models.users import PublicUserSchema, TopUserSchema, UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
 from utils.security import (
     hash_password,
     verify_password,
@@ -80,6 +83,48 @@ def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
 def get_my_profile(current_user: UserModel = Depends(get_current_user)):
     """Récupère uniquement les infos de l'utilisateur connecté via son token"""
     return current_user
+
+@router.get("/top", response_model=list[TopUserSchema])
+def get_top_users(
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+):
+    """Classe les créateurs selon les likes reçus sur leurs listes publiques."""
+    rows = (
+        db.query(
+            UserModel.id,
+            UserModel.username,
+            UserModel.image_url,
+            func.count(distinct(ListeModel.id)).label("public_lists_count"),
+            func.count(ListeLikeModel.user_id).label("likes_received"),
+        )
+        .join(
+            ListeModel,
+            and_(
+                ListeModel.users_id == UserModel.id,
+                ListeModel.public.is_(True),
+            ),
+        )
+        .outerjoin(ListeLikeModel, ListeLikeModel.liste_id == ListeModel.id)
+        .group_by(UserModel.id, UserModel.username, UserModel.image_url)
+        .order_by(
+            func.count(ListeLikeModel.user_id).desc(),
+            func.count(distinct(ListeModel.id)).desc(),
+            UserModel.username.asc(),
+        )
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": row.id,
+            "username": row.username,
+            "image_url": row.image_url,
+            "public_lists_count": row.public_lists_count,
+            "likes_received": row.likes_received,
+        }
+        for row in rows
+    ]
 
 @router.get("/{user_id}", response_model=PublicUserSchema)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
