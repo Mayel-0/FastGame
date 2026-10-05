@@ -1,4 +1,4 @@
-import { Heart, Star, UserRound, X, ListStart, Users } from "lucide-react";
+import { Heart, Star, UserRound, X, ListStart, Users, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UserIdentity from "./UserIdentity";
@@ -9,7 +9,7 @@ interface ProfileDrawerProps {
 }
 
 function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   return (
     <>
       <div
@@ -55,6 +55,19 @@ function ProfileDrawer({ isOpen, onClose }: ProfileDrawerProps) {
             <span>Mes Listes</span>
           </Link>
         </nav>
+        {user && (
+          <button
+            className="profile-drawer__logout"
+            type="button"
+            onClick={() => {
+              logout();
+              onClose();
+            }}
+          >
+            <LogOut size={20} aria-hidden="true" />
+            <span>Se déconnecter</span>
+          </button>
+        )}
       </aside>
     </>
   );

@@ -85,6 +85,34 @@
 		padding-top: 1.5rem;
 	}
 
+	&__logout {
+		display: flex;
+		align-items: center;
+		gap: .9rem;
+		width: 100%;
+		min-height: 3rem;
+		margin-top: auto;
+		padding: .8rem 1rem;
+		border: 1px solid #e4c5bb;
+		background: transparent;
+		color: var(--color-danger);
+		font-family: var(--font-ui);
+		font-weight: 700;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color .18s ease, border-color .18s ease;
+
+		&:hover {
+			border-color: var(--color-danger);
+			background: #fff4f1;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--color-danger);
+			outline-offset: 3px;
+		}
+	}
+
 	&__link {
 		display: flex;
 		align-items: center;
