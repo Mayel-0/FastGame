@@ -22,6 +22,7 @@ function App() {
         <Route path='/listes' element={<PageListe/>} />
         <Route path='/commu' element={<CommuPage/>} />
         <Route path='/jeux/d/:slug' element={<PageDetailsgame />} />
+        <Route path='/listes/public/:listId' element={<DynamiqueListePage/>} />
         <Route path='/listes/:title' element={<DynamiqueListePage/>} />
         <Route path='/' element={<HomePage/>}/>
         <Route path="/jeux" element={<GamesPage />} />

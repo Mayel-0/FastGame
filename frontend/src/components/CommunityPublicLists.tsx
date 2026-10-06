@@ -1,5 +1,6 @@
 import type { PublicList } from "../models/community";
-import { Heart, Search } from "lucide-react";
+import { Heart, Search, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UserIdentity from "./UserIdentity";
 
@@ -53,7 +54,11 @@ function PublicListCard({
             imageUrl={list.owner_image_url ?? null}
           />
         </div>
-        <h3 className="community-list__title">{list.title}</h3>
+        <h3 className="community-list__title">
+          <Link className="community-list__title-link" to={`/listes/public/${list.list_id}`}>
+            {list.title}
+          </Link>
+        </h3>
         <div className="community-list__meta">
           <p className="community-list__count">{list.items_count} jeux</p>
           {onToggleLike && !isMine ? (
@@ -77,6 +82,10 @@ function PublicListCard({
           )}
         </div>
         {likeState?.error && <small className="community-list__error">{likeState.error}</small>}
+        <Link className="community-list__cta" to={`/listes/public/${list.list_id}`}>
+          Voir les {list.items_count} jeux
+          <ArrowRight size={15} aria-hidden="true" />
+        </Link>
       </div>
     </article>
   );

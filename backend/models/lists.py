@@ -76,8 +76,13 @@ class ListeResponseSchema(BaseModel):
 
 class PublicGameOut(BaseModel):
     id: int
-    titre: str
+    titre: str | None = None
+    studio: str | None = None
+    plateforme: str | None = None
+    annee: str | None = None
+    genre: str | None = None
     image: str | None = None
+    url: str | None = None
 
 
 class PublicListOut(BaseModel):

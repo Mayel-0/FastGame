@@ -414,7 +414,19 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
         "owner": username,
         "owner_image_url": owner_image_url,
         "items_count": len(games),
-        "games": [{"id": g.id, "titre": g.titre, "image": g.image} for g in games],
+        "games": [
+            {
+                "id": g.id,
+                "titre": g.titre,
+                "studio": g.studio,
+                "plateforme": g.plateforme,
+                "annee": g.annee,
+                "genre": g.genre,
+                "image": g.image,
+                "url": g.url,
+            }
+            for g in games
+        ],
     }
 
 

@@ -107,7 +107,11 @@ function ListesList({
                           username={list.owner}
                           imageUrl={list.owner_image_url}
                         />
-                        <h3>{list.title}</h3>
+                        <h3>
+                          <Link className="Listes__liked-link" to={`/listes/public/${list.list_id}`}>
+                            {list.title}
+                          </Link>
+                        </h3>
                         <div className="Listes__liked-meta">
                           <span>{list.items_count} jeux</span>
                           <button

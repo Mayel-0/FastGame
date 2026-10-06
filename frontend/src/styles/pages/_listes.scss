@@ -112,6 +112,22 @@
 		font-size: clamp(2rem, 5vw, 3.5rem);
 	}
 
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: .75rem 1.25rem;
+		margin-top: 1rem;
+	}
+
+	&__count {
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: .85rem;
+		font-weight: 700;
+	}
+
 	&__divider {
 		max-width: var(--content-width);
 		margin: 1rem auto 2rem;
