@@ -71,8 +71,8 @@ function HomePage() {
               <h2 id="catalog-title">Les jeux du moment</h2>
             </div>
             <div className="home-page__stats" aria-label="Statistiques du catalogue">
-              <strong>{games.length}</strong>
-              <span>jeux disponibles</span>
+              <strong>{filteredGames.length}</strong>
+              <span>{filteredGames.length > 1 ? "jeux affichés" : "jeu affiché"}</span>
             </div>
           </div>
 
@@ -95,13 +95,17 @@ function HomePage() {
             </label>
           </div>
 
-          {error && <p className="game-list__state game-list__state--error" role="alert">{error}</p>}
+          {error && (
+            <p className="game-list__state game-list__state--error" role="alert">
+              {typeof error === "string" ? error : String(error)}
+            </p>
+          )}
           {!error && filteredGames.length === 0 && (
             <p className="game-list__state">Aucun jeu ne correspond à votre recherche.</p>
           )}
           {!error && filteredGames.length > 0
           && <GameList
-            games={games}
+            games={filteredGames}
             likes={likes}
             onToggleLike={toggleLike}
             lists={availableLists}
