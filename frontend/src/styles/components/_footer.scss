@@ -1,7 +1,8 @@
 .footer {
 	padding: 3rem clamp(1.25rem, 5vw, 5rem) 1.25rem;
-	background: #1b2b2c;
-	color: #dfe7e5;
+	background: var(--color-footer);
+	color: var(--color-footer-copy);
+	border-top: 1px solid var(--color-footer-line);
 
 	&__content,
 	&__bottom {
@@ -18,15 +19,20 @@
 	}
 
 	&__logo {
-		color: #fffdf8;
+		color: var(--color-ink);
+		font-family: var(--font-display);
 		font-size: 1.4rem;
 		font-weight: 800;
 		text-decoration: none;
+
+		&:hover {
+			color: var(--color-coral);
+		}
 	}
 
 	&__tagline {
-		margin: .5rem 0 0;
-		color: #aebdbb;
+		margin: 0.5rem 0 0;
+		color: var(--color-footer-copy);
 	}
 
 	&__navigation {
@@ -37,21 +43,22 @@
 	}
 
 	&__link {
-		color: #dfe7e5;
-		font-size: .9rem;
+		color: var(--color-copy);
+		font-size: 0.9rem;
 		text-decoration: none;
-		transition: color .2s ease;
+		transition: color 0.2s ease, transform 0.2s ease;
 
 		&:hover {
-			color: #e27958;
+			color: var(--color-coral);
+			transform: translateX(3px);
 		}
 	}
 
 	&__bottom {
 		padding-top: 1.25rem;
-		border-top: 1px solid #3b4d4d;
-		color: #8fa09e;
-		font-size: .8rem;
+		border-top: 1px solid var(--color-footer-line);
+		color: var(--color-muted);
+		font-size: 0.8rem;
 	}
 
 	&__copyright,

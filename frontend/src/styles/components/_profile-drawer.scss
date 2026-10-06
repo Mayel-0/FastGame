@@ -11,7 +11,7 @@
 	transform: translateX(100%);
 	border-left: 1px solid var(--color-line);
 	background: var(--color-paper);
-	box-shadow: -1rem 0 3rem rgba(27, 43, 44, .12);
+	box-shadow: -1rem 0 3rem rgba(0, 0, 0, 0.5);
 	transition: transform .25s ease;
 
 	&--open {
@@ -22,7 +22,7 @@
 		position: fixed;
 		inset: 0;
 		z-index: 19;
-		background: rgba(27, 43, 44, .35);
+		background: rgba(0, 0, 0, 0.6);
 		opacity: 0;
 		pointer-events: none;
 		transition: opacity .25s ease;
@@ -43,7 +43,7 @@
 
 		h2 {
 			margin: 0;
-			font-family: var(--font-ui);
+			font-family: var(--font-display);
 			font-size: 2rem;
 		}
 
@@ -93,10 +93,10 @@
 		min-height: 3rem;
 		margin-top: auto;
 		padding: .8rem 1rem;
-		border: 1px solid #e4c5bb;
+		border: 1px solid rgba(255, 84, 112, 0.45);
 		background: transparent;
 		color: var(--color-danger);
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-weight: 700;
 		text-align: left;
 		cursor: pointer;
@@ -104,7 +104,7 @@
 
 		&:hover {
 			border-color: var(--color-danger);
-			background: #fff4f1;
+			background: rgba(255, 84, 112, 0.12);
 		}
 
 		&:focus-visible {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ProfileDrawer from "./ProfileDrawer";
 import { Menu } from "lucide-react";
@@ -25,23 +25,26 @@ function Header() {
     };
   }, [isProfileMenuOpen]);
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `header__link${isActive ? " is-active" : ""}`;
+
   return (
     <header className="header">
       <h1 className="header__brand">
-        <Link to="/">FastGame</Link>
+        <NavLink to="/">FastGame</NavLink>
       </h1>
       <nav className="header__navigation" aria-label="Navigation principale">
         <ul className="header__menu">
-          <li className="header__item"><Link className="header__link" to="/">Accueil</Link></li>
-          <li className="header__item"><Link className="header__link" to="/jeux">Jeux</Link></li>
-          <li className="header__item"><Link className="header__link" to="/commu">Communauté</Link></li>
+          <li className="header__item"><NavLink className={navLinkClass} to="/">Accueil</NavLink></li>
+          <li className="header__item"><NavLink className={navLinkClass} to="/jeux">Jeux</NavLink></li>
+          <li className="header__item"><NavLink className={navLinkClass} to="/commu">Communauté</NavLink></li>
         </ul>
       </nav>
       <div className="header__actions">
         {!isAuthenticated ? (
           <div className="header__action-group">
             <Link className="header__action" to="/register">s'inscrire</Link>
-            <Link className="header__action header__action--primary" to="/login">connexion</Link>
+            <NavLink className="header__action header__action--primary" to="/login">connexion</NavLink>
           </div>
         ) : (
           <div className="header__action-group">

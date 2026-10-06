@@ -20,7 +20,7 @@
 
 	&__title {
 		margin: 0;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(2.2rem, 5vw, 4rem);
 		line-height: 1.05;
 	}
@@ -34,6 +34,7 @@
 	}
 
 	&__form {
+		border-radius: var(--radius-card);
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) auto auto;
 		align-items: center;
@@ -54,8 +55,8 @@
 	&__input {
 		width: 100%;
 		padding: .8rem .9rem;
-		border: 1px solid #b8c2c1;
-		background: #fff;
+		border: 1px solid var(--color-line);
+		background: var(--color-raised);
 		color: var(--color-ink);
 		font: inherit;
 	}
@@ -72,15 +73,19 @@
 	&__submit {
 		padding: .85rem 1.25rem;
 		border: 0;
-		background: var(--color-ink);
-		color: var(--color-paper);
+		border-radius: var(--radius-control);
+		background: var(--color-coral);
+		color: #160603;
+		box-shadow: 0 6px 22px rgba(255, 92, 58, 0.35);
 		font-family: var(--font-ui);
 		font-weight: 700;
 		cursor: pointer;
-		transition: background-color .2s ease;
+		transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
 
 		&:hover {
-			background: var(--color-coral);
+			background: var(--color-coral-light);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 30px rgba(255, 92, 58, 0.45);
 		}
 	}
 
@@ -103,7 +108,7 @@
 
 	&__title {
 		margin: 0;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(2rem, 5vw, 3.5rem);
 	}
 

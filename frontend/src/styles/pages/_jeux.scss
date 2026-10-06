@@ -14,7 +14,7 @@
 
 		h1 {
 			margin: 0;
-			font-family: var(--font-ui);
+			font-family: var(--font-display);
 			font-size: clamp(2.2rem, 5vw, 4rem);
 			line-height: 1;
 		}
@@ -41,7 +41,7 @@
 	&__count {
 		margin: 0;
 		color: var(--color-copy);
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		white-space: nowrap;
 
 		strong {

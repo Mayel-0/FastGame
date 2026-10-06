@@ -7,8 +7,10 @@
 		min-height: 24rem;
 		place-items: center;
 		padding: 4rem clamp(1.25rem, 5vw, 5rem);
-		background: linear-gradient(120deg, var(--color-ink), #355354);
-		color: var(--color-paper);
+		background: radial-gradient(ellipse at 20% 10%, rgba(255, 92, 58, 0.3), transparent 55%),
+			radial-gradient(ellipse at 85% 90%, rgba(124, 92, 255, 0.28), transparent 60%),
+			linear-gradient(125deg, #0b0d10, #141a24 55%, #0e1524);
+		color: var(--color-ink);
 		text-align: center;
 	}
 
@@ -18,7 +20,7 @@
 
 	&__hero h1 {
 		margin: 0;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(2.4rem, 7vw, 5rem);
 		line-height: 1;
 	}
@@ -26,22 +28,27 @@
 	&__description {
 		max-width: 36rem;
 		margin: 1.25rem auto 2rem;
-		color: #dfe7e5;
+		color: var(--color-copy);
 		font-size: 1.1rem;
 		line-height: 1.6;
 	}
 
 	&__hero-link {
 		display: inline-block;
-		padding: .8rem 1.1rem;
+		padding: .8rem 1.3rem;
+		border-radius: var(--radius-control);
 		background: var(--color-coral);
-		color: var(--color-paper);
+		color: #160603;
+		box-shadow: 0 6px 22px rgba(255, 92, 58, 0.35);
 		font-family: var(--font-ui);
 		font-weight: 700;
 		text-decoration: none;
+		transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
 
 		&:hover {
 			background: var(--color-coral-light);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 30px rgba(255, 92, 58, 0.45);
 		}
 	}
 
@@ -65,7 +72,7 @@
 
 	&__catalog h2 {
 		margin: 0;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(1.8rem, 4vw, 2.8rem);
 	}
 
@@ -73,7 +80,7 @@
 		display: grid;
 		gap: .15rem;
 		color: var(--color-copy);
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		text-align: right;
 
 		strong {

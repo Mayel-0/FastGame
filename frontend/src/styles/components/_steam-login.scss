@@ -4,6 +4,7 @@
 	padding: 2rem 1.25rem 3rem;
 
 	&__card {
+		border-radius: var(--radius-card);
 		width: min(100%, 28rem);
 		padding: 2rem;
 		border: 1px solid var(--color-line);
@@ -24,7 +25,7 @@
 
 	&__title {
 		margin: 0;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(1.8rem, 5vw, 2.5rem);
 	}
 

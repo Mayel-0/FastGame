@@ -6,11 +6,12 @@
 	background: var(--color-page);
 
 	&__content {
+		border-radius: var(--radius-card);
 		width: min(100%, 42rem);
 		padding: clamp(2rem, 6vw, 4rem);
 		border: 1px solid var(--color-line);
 		background: var(--color-paper);
-		box-shadow: 12px 12px 0 var(--color-teal-soft);
+		box-shadow: var(--shadow-card);
 		text-align: center;
 	}
 
@@ -28,7 +29,7 @@
 	&__content h1 {
 		max-width: 30rem;
 		margin: .75rem auto 1rem;
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(2rem, 6vw, 3.5rem);
 		line-height: 1.05;
 	}
@@ -58,18 +59,23 @@
 	justify-content: center;
 	gap: .5rem;
 	padding: .75rem 1rem;
+	border-radius: var(--radius-control);
 	font-family: var(--font-ui);
 	font-weight: 700;
 	text-decoration: none;
+	transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
 
 	&--accent {
 		border: 1px solid var(--color-coral);
 		background: var(--color-coral);
-		color: var(--color-paper);
+		color: #160603;
+		box-shadow: 0 6px 22px rgba(255, 92, 58, 0.35);
 
 		&:hover {
 			background: var(--color-coral-light);
 			border-color: var(--color-coral-light);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 30px rgba(255, 92, 58, 0.45);
 		}
 	}
 }
@@ -79,7 +85,8 @@
 		padding: 2rem 1rem;
 
 		&__content {
-			box-shadow: 7px 7px 0 var(--color-teal-soft);
+		border-radius: var(--radius-card);
+			box-shadow: var(--shadow-card);
 		}
 	}
 }

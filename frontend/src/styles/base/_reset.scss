@@ -6,6 +6,7 @@
 
 html {
 	font-size: 16px;
+	scroll-behavior: smooth;
 }
 
 body {
@@ -13,10 +14,40 @@ body {
 	background: var(--color-page);
 	color: var(--color-ink);
 	font-family: var(--font-body);
+	-webkit-font-smoothing: antialiased;
 }
 
 button,
 input,
 textarea {
 	font: inherit;
+}
+
+// Titres : typo display (Fraunces) par défaut,
+// surchargée au cas par cas dans les composants.
+h1,
+h2,
+h3 {
+	font-family: var(--font-display);
+}
+
+::selection {
+	background: var(--color-coral);
+	color: #160603;
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-coral);
+	outline-offset: 3px;
+}
+
+// Respect des préférences système : pas d'animation forcée.
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

@@ -7,18 +7,20 @@
 	&__button {
 		min-height: 2.5rem;
 		padding: .55rem .85rem;
-		border: 1px solid var(--color-ink);
-		background: var(--color-ink);
-		color: var(--color-paper);
+		border: 1px solid var(--color-coral);
+		border-radius: var(--radius-control);
+		background: var(--color-coral);
+		color: #160603;
 		font-family: var(--font-ui);
 		font-size: .8rem;
 		font-weight: 700;
 		cursor: pointer;
-		transition: background-color .18s ease, color .18s ease;
+		transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
 
 		&:hover:not(:disabled) {
-			background: var(--color-coral);
-			border-color: var(--color-coral);
+			background: var(--color-coral-light);
+			border-color: var(--color-coral-light);
+			transform: translateY(-1px);
 		}
 
 		&:focus-visible {

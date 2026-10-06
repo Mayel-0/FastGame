@@ -115,7 +115,7 @@ function GameList({
                         onToggle={handleToggleFavori}
                       />
 
-                      <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "4px 0" }} />
+                      <hr style={{ border: "none", borderTop: "1px solid var(--color-line)", margin: "4px 0" }} />
 
                       {otherLists.length > 0 ? (
                         otherLists.map((liste) => (

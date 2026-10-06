@@ -19,7 +19,7 @@
 	&__title {
 		margin: 0;
 		color: var(--color-ink);
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: clamp(1.6rem, 4vw, 2.25rem);
 	}
 
@@ -39,6 +39,7 @@
 	}
 
 	&__item {
+		border-radius: var(--radius-card);
 		display: grid;
 		grid-template-columns: 1.8rem minmax(0, 1fr);
 		align-items: center;
@@ -47,7 +48,7 @@
 		padding: .9rem;
 		border: 1px solid var(--color-line);
 		background: var(--color-paper);
-		box-shadow: 3px 3px 0 var(--color-teal-soft);
+		box-shadow: var(--shadow-card);
 
 		.user-identity {
 			min-width: 0;
@@ -72,7 +73,7 @@
 		flex-wrap: wrap;
 		gap: .25rem .4rem;
 		color: var(--color-copy);
-		font-family: var(--font-ui);
+		font-family: var(--font-display);
 		font-size: .75rem;
 
 		strong {
