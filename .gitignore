@@ -100,3 +100,4 @@ script/
 backend/media/avatars/
 frontend/nginx.conf
 nginx.conf
+design-preview/
