@@ -6,7 +6,7 @@ from models.game import GameModel
 from models.users import UserModel
 from routes.users import get_current_user
 
-router = APIRouter(prefix="/api/favoris", tags=["favoris"])
+router = APIRouter(prefix="/api/favoris", tags=["Favoris"])
 
 @router.get("/me/games")
 def get_my_favoris_with_games(
@@ -37,9 +37,6 @@ def get_my_favoris_with_games(
 
     return favoris_games
 
-# ---------------------------------------------------------
-# 1. GET /api/favoris/me - Obtenir la liste des favoris de l'utilisateur
-# ---------------------------------------------------------
 @router.get("/me", response_model=list[FavorisResponseSchema])
 def get_my_favoris(
     current_user: UserModel = Depends(get_current_user),
@@ -53,9 +50,6 @@ def get_my_favoris(
     return favoris
 
 
-# ---------------------------------------------------------
-# 2. POST /api/favoris/ - Ajouter un jeu/post aux favoris
-# ---------------------------------------------------------
 @router.post("/", response_model=FavorisResponseSchema, status_code=status.HTTP_201_CREATED)
 def add_favori(
     favori_data: FavorisCreateSchema,
@@ -63,7 +57,9 @@ def add_favori(
     db: Session = Depends(get_db)
 ):
     """Ajoute un élément aux favoris s'il n'y est pas déjà."""
-    # Vérifier si le favori existe déjà
+    if not db.get(GameModel, favori_data.post_id):
+        raise HTTPException(status_code=404, detail="Jeu introuvable.")
+
     existing = db.query(FavorisModel).filter(
         FavorisModel.user_id == current_user.id,
         FavorisModel.post_id == favori_data.post_id
@@ -87,9 +83,6 @@ def add_favori(
     return new_favori
 
 
-# ---------------------------------------------------------
-# 3. DELETE /api/favoris/{post_id} - Retirer un élément des favoris
-# ---------------------------------------------------------
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_favori(
     post_id: int,

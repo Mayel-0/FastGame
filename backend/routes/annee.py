@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
 from db.database import get_db
 from models.game import GameModel, GameSchema
 from routes.notes import attach_game_notes
@@ -11,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/annee/{annee}", response_model=List[GameSchema])
+@router.get("/annee/{annee}", response_model=list[GameSchema])
 def get_games_by_annee(annee: str, db: Session = Depends(get_db)):
     """Récupère les jeux par leur année (ex: /api/jeux/annee/2000)"""
     games = db.query(GameModel).filter(GameModel.annee == annee).all()

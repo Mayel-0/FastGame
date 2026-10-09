@@ -4,10 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.sql import func
 
-from db.database import Base
+from db.database import Base, BigIntPK
 
-
-# --- MODÈLE SQLALCHEMY ---
 
 class LikeModel(Base):
     __tablename__ = "likes"
@@ -15,13 +13,11 @@ class LikeModel(Base):
         UniqueConstraint("user_id", "game_id", name="uq_likes_user_game"),
     )
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(BigIntPK, primary_key=True, index=True, autoincrement=True)
     game_id = Column(Integer, ForeignKey("jeux.id", ondelete="CASCADE"), index=True, nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-
-# --- SCHÉMAS ---
 
 class LikeSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -35,8 +31,6 @@ class LikeSchema(BaseModel):
 class LikeCreateSchema(BaseModel):
     game_id: int = Field(..., gt=0)
 
-
-# --- SCHÉMA DE SORTIE (page Communauté) ---
 
 class LikedGameOut(BaseModel):
     id: int

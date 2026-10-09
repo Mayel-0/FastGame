@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Abonnement, AbonnementWithUser } from "../models/abonnement";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export const useAbonnements = () => {
   const { authFetch } = useAuth();
@@ -20,7 +19,6 @@ export const useAbonnements = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. GET /api/abonnements/me/following (Mes abonnements)
   const fetchFollowing = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -46,7 +44,6 @@ export const useAbonnements = () => {
     }
   }, [authFetch]);
 
-  // 2. GET /api/abonnements/me/followers (Mes abonnés)
   const fetchFollowers = useCallback(async () => {
     setError(null);
     try {
@@ -62,7 +59,6 @@ export const useAbonnements = () => {
     }
   }, [authFetch]);
 
-  // 3. GET /api/abonnements/me/following/details (Abonnements avec profil)
   const fetchFollowingDetails = useCallback(async () => {
     setError(null);
     try {
@@ -82,7 +78,6 @@ export const useAbonnements = () => {
     }
   }, [authFetch]);
 
-  // 4. GET /api/abonnements/me/followers/details (Abonnés avec profil)
   const fetchFollowersDetails = useCallback(async () => {
     setError(null);
     try {
@@ -102,7 +97,6 @@ export const useAbonnements = () => {
     }
   }, [authFetch]);
 
-  // 5. POST /api/abonnements/ (S'abonner)
   const followUser = async (followId: number) => {
     setError(null);
     try {
@@ -129,7 +123,6 @@ export const useAbonnements = () => {
     }
   };
 
-  // 6. DELETE /api/abonnements/{follow_id} (Se désabonner)
   const unfollowUser = async (followId: number) => {
     setError(null);
     try {
@@ -160,7 +153,6 @@ export const useAbonnements = () => {
     }
   };
 
-  // Toggle : s'abonne ou se désabonne
   const toggleFollow = async (followId: number) => {
     if (followingMap[followId]) {
       return await unfollowUser(followId);

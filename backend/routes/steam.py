@@ -1,14 +1,16 @@
+import os
+from urllib.parse import urlencode
+
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+
 from db.database import get_db
-from models.users import UserModel
 from models.steam import SteamAccountModel, SteamAccountSchema
-from routes.users import get_current_user
-from utils.security import create_access_token, SECRET_KEY, ALGORITHM
-from jose import jwt, JWTError
-import httpx
-import os
+from models.users import UserModel
+from routes.users import get_current_user, get_user_from_token
+from utils.security import create_access_token
 
 router = APIRouter(prefix="/api/steam", tags=["Steam"])
 
@@ -18,105 +20,89 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 
-# ------------------------------------------------------------------
-# 1. GET /api/steam/link
-#    Redirige l'user connecté vers Steam OpenID
-#    On glisse son JWT dans le return_to pour le retrouver au callback
-# ------------------------------------------------------------------
+def _redirect_to_profile(**params: str) -> RedirectResponse:
+    return RedirectResponse(f"{FRONTEND_URL}/profil?{urlencode(params)}")
+
+
 @router.get("/link")
 def link_steam(current_user: UserModel = Depends(get_current_user)):
-    token = create_access_token(data={"sub": current_user.email})
+    token = create_access_token(data={"sub": str(current_user.id)})
 
-    params = "&".join([
-        "openid.ns=http://specs.openid.net/auth/2.0",
-        "openid.mode=checkid_setup",
-        f"openid.return_to={BASE_URL}/api/steam/callback?token={token}",
-        f"openid.realm={BASE_URL}",
-        "openid.identity=http://specs.openid.net/auth/2.0/identifier_select",
-        "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
-    ])
+    params = urlencode({
+        "openid.ns": "http://specs.openid.net/auth/2.0",
+        "openid.mode": "checkid_setup",
+        "openid.return_to": f"{BASE_URL}/api/steam/callback?{urlencode({'token': token})}",
+        "openid.realm": BASE_URL,
+        "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
+        "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
+    })
 
     return RedirectResponse(url=f"{STEAM_OPENID_URL}?{params}")
 
 
-# ------------------------------------------------------------------
-# 2. GET /api/steam/callback
-#    Steam redirige ici après auth
-#    On valide, on récupère les infos Steam, on sauvegarde
-# ------------------------------------------------------------------
 @router.get("/callback")
 async def steam_callback(request: Request, db: Session = Depends(get_db)):
-
     params = dict(request.query_params)
 
-    # --- Extraire le steamId64 ---
     claimed_id = params.get("openid.claimed_id", "")
-    if not claimed_id or "/openid/id/" not in claimed_id:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=invalid_id")
-
     steam_id = claimed_id.split("/openid/id/")[-1]
-    if not steam_id.isdigit():
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=invalid_id")
+    if "/openid/id/" not in claimed_id or not steam_id.isdigit():
+        return _redirect_to_profile(steam_error="invalid_id")
 
-    # --- Valider auprès de Steam (obligatoire, ne pas sauter) ---
-    validation_params = {**params, "openid.mode": "check_authentication"}
-    async with httpx.AsyncClient() as client:
-        validation = await client.post(STEAM_OPENID_URL, data=validation_params)
+    validation_params = {
+        key: value for key, value in params.items() if key.startswith("openid.")
+    }
+    validation_params["openid.mode"] = "check_authentication"
+    try:
+        async with httpx.AsyncClient() as client:
+            validation = await client.post(STEAM_OPENID_URL, data=validation_params)
+    except httpx.HTTPError:
+        return _redirect_to_profile(steam_error="validation_failed")
 
     if "is_valid:true" not in validation.text:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=validation_failed")
+        return _redirect_to_profile(steam_error="validation_failed")
 
-    # --- Identifier l'user via le JWT passé dans l'URL ---
     token = params.get("token")
     if not token:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=missing_token")
+        return _redirect_to_profile(steam_error="missing_token")
 
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        user = db.query(UserModel).filter(UserModel.email == email).first()
-    except JWTError:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=invalid_token")
-
+    user = get_user_from_token(token, db)
     if not user:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=user_not_found")
+        return _redirect_to_profile(steam_error="invalid_token")
 
-    # --- Vérifier que ce steamId n'est pas déjà lié à un autre compte ---
     existing = db.query(SteamAccountModel).filter(
         SteamAccountModel.steam_id == steam_id,
         SteamAccountModel.user_id != user.id
     ).first()
     if existing:
-        return RedirectResponse(f"{FRONTEND_URL}/settings?steam_error=already_linked")
+        return _redirect_to_profile(steam_error="already_linked")
 
-    # --- Récupérer les infos du profil Steam via l'API publique ---
     steam_name = None
     avatar_url = None
 
     if STEAM_API_KEY:
-        async with httpx.AsyncClient() as client:
-            res = await client.get(
-                "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
-                params={"key": STEAM_API_KEY, "steamids": steam_id}
-            )
-            data = res.json()
-            players = data.get("response", {}).get("players", [])
-            if players:
-                steam_name = players[0].get("personaname")
-                avatar_url = players[0].get("avatarfull")
+        try:
+            async with httpx.AsyncClient() as client:
+                res = await client.get(
+                    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",
+                    params={"key": STEAM_API_KEY, "steamids": steam_id}
+                )
+            players = res.json().get("response", {}).get("players", [])
+        except (httpx.HTTPError, ValueError):
+            players = []
+        if players:
+            steam_name = players[0].get("personaname")
+            avatar_url = players[0].get("avatarfull")
 
-    # --- Upsert dans steam_accounts ---
     steam_account = db.query(SteamAccountModel).filter(
         SteamAccountModel.user_id == user.id
     ).first()
 
     if steam_account:
-        # Déjà lié → on met à jour
         steam_account.steam_id = steam_id
         steam_account.steam_name = steam_name
         steam_account.avatar_url = avatar_url
     else:
-        # Nouveau lien
         steam_account = SteamAccountModel(
             user_id=user.id,
             steam_id=steam_id,
@@ -127,15 +113,9 @@ async def steam_callback(request: Request, db: Session = Depends(get_db)):
 
     db.commit()
 
-    return RedirectResponse(
-        f"{FRONTEND_URL}/settings?steam_success=true&steam_name={steam_name}"
-    )
+    return _redirect_to_profile(steam_success="true", steam_name=steam_name or "")
 
 
-# ------------------------------------------------------------------
-# 3. GET /api/steam/me
-#    Récupère les infos Steam de l'user connecté
-# ------------------------------------------------------------------
 @router.get("/me", response_model=SteamAccountSchema)
 def get_my_steam(
     current_user: UserModel = Depends(get_current_user),
@@ -151,10 +131,6 @@ def get_my_steam(
     return account
 
 
-# ------------------------------------------------------------------
-# 4. DELETE /api/steam/unlink
-#    Délier le compte Steam
-# ------------------------------------------------------------------
 @router.delete("/unlink", status_code=204)
 def unlink_steam(
     current_user: UserModel = Depends(get_current_user),

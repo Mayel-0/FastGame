@@ -6,13 +6,12 @@ import { Link } from "react-router-dom";
 import { toSlug } from "../utils/slug";
 import { Menu, Folder } from "lucide-react";
 import type { ListOption } from "../models/liste";
-import { useAuth } from "../context/AuthContext"; // 1. Importation de useAuth
+import { useAuth } from "../context/AuthContext";
 
 interface GameListProps {
   games: Game[];
   likes: Record<number, boolean>;
   lists?: ListOption[];
-  favorisListId?: number;
   favorisMap?: Record<number, boolean>;
   onToggleLike: (gameId: number) => Promise<void>;
   onToggleFavori?: (gameId: number) => Promise<void | boolean>;
@@ -23,13 +22,12 @@ function GameList({
   games,
   likes,
   lists = [],
-  favorisListId = 0,
   favorisMap = {},
   onToggleLike,
   onToggleFavori,
   onAddToList,
 }: GameListProps) {
-  const { isAuthenticated } = useAuth(); // 2. Récupération du statut d'authentification
+  const { isAuthenticated } = useAuth();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const toggleMenu = (gameId: number) => {
@@ -45,16 +43,10 @@ function GameList({
 
   const handleToggleFavori = async (gameId: number) => {
     setOpenMenuId(null);
-    if (onToggleFavori) {
-      await onToggleFavori(gameId);
-    } else if (onAddToList) {
-      await onAddToList(favorisListId, gameId);
-    }
+    await onToggleFavori?.(gameId);
   };
 
-  const otherLists = favorisListId
-    ? lists.filter((l) => l.id !== favorisListId)
-    : lists;
+  const hasMenu = Boolean(onToggleFavori || onAddToList);
 
   return (
     <section className="game-list" aria-label="Liste des jeux">
@@ -95,44 +87,48 @@ function GameList({
                   onToggle={onToggleLike}
                 />
 
-                <div className="game-card__menu">
-                  <button
-                    type="button"
-                    className="game-card__menu-btn"
-                    onClick={() => toggleMenu(game.id)}
-                    aria-label="Ajouter à une liste"
-                  >
-                    <Menu size={20} aria-hidden="true" />
-                  </button>
+                {hasMenu && (
+                  <div className="game-card__menu">
+                    <button
+                      type="button"
+                      className="game-card__menu-btn"
+                      onClick={() => toggleMenu(game.id)}
+                      aria-label="Ajouter à une liste"
+                      aria-expanded={openMenuId === game.id}
+                    >
+                      <Menu size={20} aria-hidden="true" />
+                    </button>
 
-                  {openMenuId === game.id && (
-                    <div className="game-card__dropdown">
-                      <p className="game-card__dropdown-label">Ajouter à...</p>
+                    {openMenuId === game.id && (
+                      <div className="game-card__dropdown">
+                        <p className="game-card__dropdown-label">Ajouter à...</p>
 
-                      <GameFavoriButton
-                        gameId={game.id}
-                        isFavori={favorisMap[game.id] ?? false}
-                        onToggle={handleToggleFavori}
-                      />
+                        {onToggleFavori && (
+                          <>
+                            <GameFavoriButton
+                              gameId={game.id}
+                              isFavori={favorisMap[game.id] ?? false}
+                              onToggle={handleToggleFavori}
+                            />
+                            <hr style={{ border: "none", borderTop: "1px solid var(--color-line)", margin: "4px 0" }} />
+                          </>
+                        )}
 
-                      <hr style={{ border: "none", borderTop: "1px solid var(--color-line)", margin: "4px 0" }} />
-
-                      {otherLists.length > 0 ? (
-                        otherLists.map((liste) => (
+                        {onAddToList && lists.map((liste) => (
                           <button
                             key={liste.id}
                             type="button"
                             className="game-card__dropdown-item"
                             onClick={() => handleSelectOption(liste.id, game.id)}
                           >
-                            <Folder size={16} />
+                            <Folder size={16} aria-hidden="true" />
                             {liste.liste_title}
                           </button>
-                        ))
-                      ) : null}
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

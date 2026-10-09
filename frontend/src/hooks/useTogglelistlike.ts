@@ -1,9 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { LikeResponse } from "../models/likes";
-
-// Même valeur par défaut que dans AuthContext
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export function useToggleListLike() {
   const { authFetch, isAuthenticated } = useAuth();

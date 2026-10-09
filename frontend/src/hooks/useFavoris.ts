@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Favori } from "../models/favoris";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export const useFavoris = () => {
   const { authFetch } = useAuth();
@@ -12,7 +11,6 @@ export const useFavoris = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. GET /api/favoris/me
   const fetchFavoris = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -24,7 +22,6 @@ export const useFavoris = () => {
       const data: Favori[] = await res.json();
       setFavoris(data);
 
-      // Met à jour la map de correspondance rapidement accessible par ID
       const map: Record<number, boolean> = {};
       data.forEach((fav) => {
         map[fav.post_id] = true;
@@ -39,7 +36,6 @@ export const useFavoris = () => {
     }
   }, [authFetch]);
 
-  // 2. POST /api/favoris/
   const addFavori = async (postId: number) => {
     setError(null);
     try {
@@ -58,7 +54,6 @@ export const useFavoris = () => {
 
       const newFavori: Favori = await res.json();
 
-      // Mise à jour de l'état local
       setFavoris((prev) => [...prev, newFavori]);
       setFavorisMap((prev) => ({ ...prev, [postId]: true }));
       return true;
@@ -68,7 +63,6 @@ export const useFavoris = () => {
     }
   };
 
-  // 3. DELETE /api/favoris/{post_id}
   const removeFavori = async (postId: number) => {
     setError(null);
     try {
@@ -83,7 +77,6 @@ export const useFavoris = () => {
         );
       }
 
-      // Mise à jour de l'état local
       setFavoris((prev) => prev.filter((f) => f.post_id !== postId));
       setFavorisMap((prev) => {
         const updated = { ...prev };
@@ -97,7 +90,6 @@ export const useFavoris = () => {
     }
   };
 
-  // Toggle facile : ajoute si absent, supprime si présent
   const toggleFavori = async (postId: number) => {
     if (favorisMap[postId]) {
       return await removeFavori(postId);
@@ -106,7 +98,6 @@ export const useFavoris = () => {
     }
   };
 
-  // Chargement automatique au montage du hook
   useEffect(() => {
     fetchFavoris();
   }, [fetchFavoris]);

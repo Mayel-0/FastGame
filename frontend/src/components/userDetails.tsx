@@ -6,15 +6,12 @@ import type Profil from "../models/profil";
 import { resolveMediaUrl } from "../utils/media";
 import { useAbonnements } from "../hooks/useAbonnement";
 import FollowToggleButton from "./FollowToggleButton";
-import type { LikeWithGame } from "../models/likes";
+import { API_URL } from "../utils/api";
 
 interface UserDetailsProps {
   profil: Profil;
   currentUser: Profil | null;
-  likes: LikeWithGame[];
 }
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 function PublicProfileFollowAction({ userId }: { userId: number }) {
   const { followingMap, loading, toggleFollow } = useAbonnements();
@@ -30,7 +27,7 @@ function PublicProfileFollowAction({ userId }: { userId: number }) {
 }
 
 function UserDetails({ profil, currentUser }: UserDetailsProps) {
-  const { authFetch } = useAuth();
+  const { authFetch, refreshProfile } = useAuth();
   const isMe = currentUser?.id === profil.id;
   const [profile, setProfile] = useState(profil);
   const [email, setEmail] = useState(currentUser?.email ?? "");
@@ -56,7 +53,8 @@ function UserDetails({ profil, currentUser }: UserDetailsProps) {
     if (!response.ok) throw new Error(data.detail ?? "Impossible de modifier le profil.");
 
     setProfile(data);
-    if (field === "email") setEmail(value);
+    if (field === "email") setEmail(data.email ?? value);
+    void refreshProfile();
   }
 
   return (

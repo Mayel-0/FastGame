@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship  # ← ajout
-from pydantic import BaseModel, Field
+from sqlalchemy.orm import relationship
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from db.database import Base
+
 
 class UserModel(Base):
     __tablename__ = "users"
@@ -14,12 +15,19 @@ class UserModel(Base):
     password = Column(String, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     bio = Column(String, nullable=True)
-    image_url = Column(String, nullable=True, server_default="/api/media/default-avatar.svg")
+    image_url = Column(String, nullable=True, server_default="/api/media/default-avatar.png")
 
-    steam_account = relationship("SteamAccountModel", back_populates="user", uselist=False)  # ← ajout
+    steam_account = relationship(
+        "SteamAccountModel",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
-# Schémas Pydantic
+
 class UserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime | None = None
     email: str
@@ -27,18 +35,16 @@ class UserSchema(BaseModel):
     bio: str | None = None
     image_url: str | None = None
 
-    class Config:
-        from_attributes = True
 
 class PublicUserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime | None = None
     username: str
     bio: str | None = None
     image_url: str | None = None
 
-    class Config:
-        from_attributes = True
 
 class TopUserSchema(BaseModel):
     id: int
@@ -47,11 +53,13 @@ class TopUserSchema(BaseModel):
     public_lists_count: int
     likes_received: int
 
+
 class UserCreateSchema(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=8, max_length=72)
     username: str = Field(min_length=1, max_length=50)
     bio: str | None = Field(default=None, max_length=500)
+
 
 class UserUpdateSchema(BaseModel):
     email: str | None = Field(default=None, min_length=3, max_length=320)
@@ -59,9 +67,11 @@ class UserUpdateSchema(BaseModel):
     bio: str | None = Field(default=None, max_length=500)
     password: str | None = Field(default=None, min_length=8, max_length=72)
 
+
 class UserLoginSchema(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=1, max_length=72)
+
 
 class TokenSchema(BaseModel):
     access_token: str

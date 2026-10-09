@@ -30,7 +30,6 @@ app = FastAPI(
     redoc_url=None if is_production else "/redoc",
 )
 
-# 1. Définir les origines autorisées (les domaines qui ont le droit d'appeler ton API)
 origins = [origin.strip() for origin in os.getenv(
     "CORS_ORIGINS",
     "https://fastgames.mael-llado.com,http://fastgames.mael-llado.com,http://localhost:3000,http://localhost:5173",
@@ -43,13 +42,12 @@ allowed_hosts = [host.strip() for host in os.getenv(
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
-# 2. Ajouter le middleware CORS à l'application
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Ou ["*"] pour tout autoriser
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],    # Autorise toutes les méthodes (GET, POST, etc.)
-    allow_headers=["*"],    # Autorise tous les headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -64,7 +62,6 @@ async def add_security_headers(request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
-# Inclusion de tes routes
 app.include_router(games_router)
 app.include_router(game_id_router)
 app.include_router(game_title_router)
@@ -81,8 +78,6 @@ app.include_router(favoris_router)
 app.include_router(steam_router)
 app.include_router(avatar_router)
 app.include_router(abonnements_router)
-# Fichiers statiques : avatar par défaut et photos de profil (backend/media/)
-# Placé après les routers, sous /api pour passer par le même proxy nginx que l'API
 app.mount("/api/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 @app.get("/")

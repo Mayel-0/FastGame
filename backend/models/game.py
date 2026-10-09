@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from db.database import Base
 
 
-# Modèle SQLAlchemy (pour la base de données)
 class GameModel(Base):
     __tablename__ = "jeux"
 
@@ -17,8 +16,9 @@ class GameModel(Base):
     url = Column(String)
 
 
-# Schéma Pydantic (pour valider et formater la réponse de l'API)
 class GameSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     titre: str | None = None
     studio: str | None = None
@@ -29,6 +29,3 @@ class GameSchema(BaseModel):
     url: str | None = None
     note: float | None = None
     note_moyenne: float | None = None
-
-    class Config:
-        from_attributes = True

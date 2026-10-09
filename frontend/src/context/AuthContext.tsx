@@ -8,12 +8,9 @@ import {
   type ReactNode,
 } from "react";
 import type Profil from "../models/profil";
+import { API_URL } from "../utils/api";
 
 const TOKEN_KEY = "fastgame_access_token";
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-
-// ── Types ──────────────────────────────────────────────────────────────────
-
 interface JwtPayload {
   sub?: string | number;
   exp?: number;
@@ -29,8 +26,6 @@ interface AuthContextValue {
   refreshProfile: () => Promise<Profil | null>;
   authFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────
 
 function decodeToken(token: string): JwtPayload | null {
   try {
@@ -55,23 +50,17 @@ function getExpDelay(token: string): number | null {
   return Math.max(0, exp * 1000 - Date.now());
 }
 
-// ── Context ────────────────────────────────────────────────────────────────
-
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => {
     const stored = sessionStorage.getItem(TOKEN_KEY);
-    // On valide le token dès l'init — s'il est expiré on l'ignore
     return stored && isTokenValid(stored) ? stored : null;
   });
   const [user, setUser] = useState<Profil | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Ref pour le timer d'expiration auto
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // ── logout ───────────────────────────────────────────────────────────────
 
   const logout = useCallback(() => {
     sessionStorage.removeItem(TOKEN_KEY);
@@ -79,10 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
   }, []);
-
-  // ── authFetch ────────────────────────────────────────────────────────────
-  // On utilise une ref pour le token afin d'éviter de recréer authFetch
-  // à chaque changement de token (casse la chaîne de dépendances)
 
   const tokenRef = useRef(token);
   useEffect(() => { tokenRef.current = token; }, [token]);
@@ -103,10 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (response.status === 401) logout();
     return response;
-  }, [logout]); // logout est stable grâce à useCallback sans dépendances changeantes
-
-  // ── fetchProfile ─────────────────────────────────────────────────────────
-  // Séparé de refreshProfile pour éviter les dépendances circulaires
+  }, [logout]);
 
   const fetchProfile = useCallback(async (tkn: string): Promise<Profil | null> => {
     const response = await fetch(`${API_URL}/api/users/me`, {
@@ -119,8 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile);
     return profile;
   }, []);
-
-  // ── refreshProfile ───────────────────────────────────────────────────────
 
   const refreshProfile = useCallback(async (): Promise<Profil | null> => {
     const currentToken = tokenRef.current;
@@ -138,8 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return profile;
   }, [logout, fetchProfile]);
-
-  // ── login ────────────────────────────────────────────────────────────────
 
   const login = useCallback(async (newToken: string): Promise<Profil> => {
     if (!isTokenValid(newToken)) {
@@ -161,19 +139,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return profile;
   }, [fetchProfile]);
 
-  // ── Init : charge le profil au montage ───────────────────────────────────
-
   useEffect(() => {
     if (!token) {
       setIsLoading(false);
       return;
     }
     refreshProfile().finally(() => setIsLoading(false));
-    // On veut que ça tourne une seule fois au montage
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // ── Timer d'expiration auto ───────────────────────────────────────────────
 
   useEffect(() => {
     if (!token) return;

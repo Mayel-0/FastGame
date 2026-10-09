@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { LikedList } from "../models/community";
-
-// Même valeur par défaut que dans AuthContext
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export function useMyLikedLists(limit = 50) {
   const { authFetch, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -13,7 +11,6 @@ export function useMyLikedLists(limit = 50) {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    // On attend que le contexte d'authentification ait fini de charger
     if (authLoading) return;
 
     if (!isAuthenticated) {
@@ -44,10 +41,8 @@ export function useMyLikedLists(limit = 50) {
     return () => controller.abort();
   }, [authFetch, isAuthenticated, authLoading, limit, tick]);
 
-  /** Relance la requête. */
   const refetch = useCallback(() => setTick((t) => t + 1), []);
 
-  /** Retire une liste de l'affichage tout de suite (après avoir retiré son like). */
   const removeList = useCallback(
     (listId: number) =>
       setLists((prev) => prev.filter((l) => l.list_id !== listId)),

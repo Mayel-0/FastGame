@@ -21,35 +21,42 @@ router = APIRouter(
     tags=["Users"]
 )
 
-# Utilisation de HTTPBearer pour un champ de token simple et direct dans Swagger
 security = HTTPBearer(auto_error=False)
 
-# Fonction utilitaire pour récupérer l'utilisateur connecté grâce à son token JWT
+
+def get_user_from_token(token: str, db: Session) -> UserModel | None:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload.get("sub"))
+    except (JWTError, TypeError, ValueError):
+        return None
+    return db.get(UserModel, user_id)
+
+
 def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Impossible de valider les identifiants",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    user = get_user_from_token(credentials.credentials, db) if credentials else None
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Impossible de valider les identifiants",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
 
-    if credentials is not None:
-        try:
-            payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-            email: str | None = payload.get("sub")
-            if email is not None:
-                user = db.query(UserModel).filter(UserModel.email == email).first()
-                if user is not None:
-                    return user
-        except JWTError:
-            pass
 
-    raise credentials_exception
+def get_optional_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security), db: Session = Depends(get_db)):
+    if credentials is None:
+        return None
+    return get_user_from_token(credentials.credentials, db)
 
-# 1. INSCRIPTION (POST) -> Hache le mot de passe
+
 @router.post("/register", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
     user_data.email = user_data.email.strip().lower()
     user_data.username = user_data.username.strip()
+    if not user_data.username:
+        raise HTTPException(status_code=400, detail="Le nom d'utilisateur est obligatoire.")
+
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
         raise HTTPException(status_code=400, detail="Cet email est déjà utilisé.")
 
@@ -68,21 +75,22 @@ def register_user(user_data: UserCreateSchema, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# 2. CONNEXION (POST) -> Renvoie un Token JWT au Front-end
+
 @router.post("/login", response_model=TokenSchema)
 def login_user(user_data: UserLoginSchema, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.email == user_data.email.strip().lower()).first()
     if not user or not verify_password(user_data.password, user.password):
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect.", headers={"WWW-Authenticate": "Bearer"})
 
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# 3. GET MON PROFIL (Sécurisé)
+
 @router.get("/me", response_model=UserSchema)
 def get_my_profile(current_user: UserModel = Depends(get_current_user)):
     """Récupère uniquement les infos de l'utilisateur connecté via son token"""
     return current_user
+
 
 @router.get("/top", response_model=list[TopUserSchema])
 def get_top_users(
@@ -126,12 +134,14 @@ def get_top_users(
         for row in rows
     ]
 
+
 @router.get("/{user_id}", response_model=PublicUserSchema)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
     return user
+
 
 @router.get("/{user_id}/notes")
 def get_user_with_notes(user_id: int, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -145,7 +155,6 @@ def get_user_with_notes(user_id: int, current_user: UserModel = Depends(get_curr
         "user": {
             "id": user.id,
             "created_at": user.created_at,
-            "email": user.email,
             "username": user.username,
             "bio": user.bio,
         },
@@ -161,7 +170,7 @@ def get_user_with_notes(user_id: int, current_user: UserModel = Depends(get_curr
         ],
     }
 
-# 4. MODIFIER MON PROFIL (Sécurisé)
+
 @router.patch("/me", response_model=UserSchema)
 def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     """Met à jour le profil de l'utilisateur connecté"""
@@ -174,6 +183,8 @@ def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Dep
 
     if "username" in user_data.model_fields_set and user_data.username is not None:
         username = user_data.username.strip()
+        if not username:
+            raise HTTPException(status_code=400, detail="Le nom d'utilisateur est obligatoire.")
         existing_username = db.query(UserModel).filter(UserModel.username == username, UserModel.id != current_user.id).first()
         if existing_username:
             raise HTTPException(status_code=409, detail="Ce nom d'utilisateur est déjà pris.")
@@ -189,7 +200,7 @@ def update_my_profile(user_data: UserUpdateSchema, current_user: UserModel = Dep
     db.refresh(current_user)
     return current_user
 
-# 5. SUPPRIMER MON PROFIL (Sécurisé)
+
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_my_profile(current_user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     """Supprime le compte de l'utilisateur connecté"""

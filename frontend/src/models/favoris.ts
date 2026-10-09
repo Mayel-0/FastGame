@@ -8,11 +8,11 @@ export interface Favori {
 export interface FavoriWithGame {
   favori_id: number;
   game_id: number;
-  titre: string;
-  studio?: string;
-  plateforme?: string;
-  annee?: number;
-  genre?: string;
-  image?: string;
-  url?: string;
+  titre: string | null;
+  studio: string | null;
+  plateforme: string | null;
+  annee: string | null;
+  genre: string | null;
+  image: string | null;
+  url: string | null;
 }

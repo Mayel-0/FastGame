@@ -135,6 +135,58 @@ class JwtAuthTests(unittest.TestCase):
         self.assertEqual(response.json()["notes"][0]["username"], "alice")
         self.assertEqual(response.json()["notes"][0]["image_url"], "/api/media/avatars/alice.webp")
 
+    def test_token_stays_valid_after_email_change(self):
+        client = TestClient(app, base_url="http://localhost")
+        login_response = client.post(
+            "/api/users/login",
+            json={"email": "alice@example.com", "password": "secret123"},
+        )
+        headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+        update_response = client.patch(
+            "/api/users/me",
+            json={"email": "Alice.New@example.com"},
+            headers=headers,
+        )
+        self.assertEqual(update_response.status_code, 200, update_response.text)
+        self.assertEqual(update_response.json()["email"], "alice.new@example.com")
+
+        profile_response = client.get("/api/users/me", headers=headers)
+        self.assertEqual(profile_response.status_code, 200, profile_response.text)
+        self.assertEqual(profile_response.json()["email"], "alice.new@example.com")
+
+    def test_followers_details_do_not_expose_email(self):
+        db = self.SessionLocal()
+        bob = UserModel(email="bob@example.com", password=hash_password("secret123"), username="bob")
+        db.add(bob)
+        db.commit()
+        db.close()
+
+        client = TestClient(app, base_url="http://localhost")
+        bob_token = client.post(
+            "/api/users/login",
+            json={"email": "bob@example.com", "password": "secret123"},
+        ).json()["access_token"]
+        follow_response = client.post(
+            "/api/abonnements/",
+            json={"follow_id": self.user_id},
+            headers={"Authorization": f"Bearer {bob_token}"},
+        )
+        self.assertEqual(follow_response.status_code, 201, follow_response.text)
+
+        alice_token = client.post(
+            "/api/users/login",
+            json={"email": "alice@example.com", "password": "secret123"},
+        ).json()["access_token"]
+        response = client.get(
+            "/api/abonnements/me/followers/details",
+            headers={"Authorization": f"Bearer {alice_token}"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()[0]["user"]["username"], "bob")
+        self.assertNotIn("email", response.json()[0]["user"])
+
 
 if __name__ == "__main__":
     unittest.main()

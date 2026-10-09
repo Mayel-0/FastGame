@@ -1,24 +1,11 @@
-import { useState, useEffect } from "react";
+import { useFetch } from "./useFetch";
 import type Game from "../models/game";
 
-const useAllGame = () => {
-  const [AllGames, setAllGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    fetch(
-      `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/jeux/`,
-    )
-      .then((res) => {
-        if (!res.ok) throw Error("Erreur recuperation des jeux");
-        return res.json();
-      })
-      .then(setAllGames)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
+const NO_GAMES: Game[] = [];
 
-  return { AllGames, loading, error };
+const useAllGame = () => {
+  const { data, loading, error } = useFetch<Game[]>("/api/jeux/");
+  return { games: data ?? NO_GAMES, loading, error };
 };
 
 export default useAllGame;

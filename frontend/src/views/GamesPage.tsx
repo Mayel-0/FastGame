@@ -7,25 +7,17 @@ import useUserLists from "../hooks/useUserLists"
 import useFavoris from "../hooks/useFavoris";
 
 function GamesPage() {
-  const { AllGames: games, loading: loadingGames, error } = useAllGame();
+  const { games, loading: loadingGames, error } = useAllGame();
   const { joinedLists, addItemToList, loading: listsLoading } = useUserLists();
-  const { toggleFavori } = useFavoris();
+  const { favorisMap, toggleFavori } = useFavoris();
 
   const availableLists = joinedLists.map((l) => ({
     id: l.list_id,
     liste_title: l.title,
   }));
 
-  const handleAddToList = async (listId: number, gameId: number) => {
-    if (listId === 0) {
-      await toggleFavori(gameId);
-    } else {
-      await addItemToList(listId, gameId);
-    }
-  };
   const { isLoading: loadingUser} = useAuth();
-  const gameIds = games.map((g) => g.id);
-  const { likes, loading: loadingLikes, toggleLike } = useLikeStatus(gameIds);
+  const { likes, loading: loadingLikes, toggleLike } = useLikeStatus();
 
   const isLoading = [loadingGames, loadingUser, loadingLikes, listsLoading].some(Boolean)
 
@@ -48,8 +40,9 @@ function GamesPage() {
             likes={likes}
             onToggleLike={toggleLike}
             lists={availableLists}
-            favorisListId={0}
-            onAddToList={handleAddToList}
+            favorisMap={favorisMap}
+            onToggleFavori={toggleFavori}
+            onAddToList={addItemToList}
           />
         )}
       </PageLoader>

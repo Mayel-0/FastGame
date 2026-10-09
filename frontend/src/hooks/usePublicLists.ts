@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { PublicList } from "../models/community";
+import { API_URL } from "../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
 const PAGE_SIZE = 50;
 
 export function usePublicLists() {

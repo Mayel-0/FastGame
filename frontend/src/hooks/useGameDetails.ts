@@ -3,11 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import type Game from "../models/game";
 import type { GameDetailsPayload, Note } from "../models/game";
 import { toSlug } from "../utils/slug";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export default function useGameDetails(slug?: string, initialGame?: Game | null) {
-  const { authFetch } = useAuth();
+  const { authFetch, token } = useAuth();
   const [game, setGame] = useState<Game | null>(initialGame ?? null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [averageNote, setAverageNote] = useState<number | null>(null);
@@ -23,7 +22,10 @@ export default function useGameDetails(slug?: string, initialGame?: Game | null)
       return;
     }
 
-    const response = await fetch(`${API_URL}/api/notes/game/${resolvedGame.id}`);
+    const response = await fetch(
+      `${API_URL}/api/notes/game/${resolvedGame.id}`,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+    );
     if (!response.ok) {
       throw new Error("Impossible de récupérer les notes du jeu.");
     }
@@ -33,7 +35,7 @@ export default function useGameDetails(slug?: string, initialGame?: Game | null)
     setNotes(payload.notes ?? []);
     setAverageNote(payload.average_note ?? payload.game?.note_moyenne ?? null);
     setUserNote(payload.user_note ?? null);
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     let isActive = true;

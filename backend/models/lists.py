@@ -4,15 +4,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, Integer, String, true
 from sqlalchemy.sql import func
 
-from db.database import Base
+from db.database import Base, BigIntPK
 
-
-# --- MODÈLES SQLALCHEMY ---
 
 class ListeModel(Base):
     __tablename__ = "liste"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(BigIntPK, primary_key=True, index=True, autoincrement=True)
     users_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     liste_title = Column(String, nullable=False)
     public = Column(Boolean, nullable=False, default=True, server_default=true())
@@ -23,7 +21,6 @@ class ListeModel(Base):
 class ListeItemModel(Base):
     __tablename__ = "liste_items"
 
-    # Clé primaire composite (id_list + id_item)
     id_list = Column(
         BigInteger,
         ForeignKey("liste.id", ondelete="CASCADE"),
@@ -37,8 +34,6 @@ class ListeItemModel(Base):
     )
     id_user = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
-
-# --- SCHÉMAS D'ENTRÉE ---
 
 class ListeCreateSchema(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -59,8 +54,6 @@ class ListItemCreateSchema(BaseModel):
     list_id: int
 
 
-# --- SCHÉMAS DE SORTIE ---
-
 class ListeResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -71,8 +64,6 @@ class ListeResponseSchema(BaseModel):
     items_count: int
     created_at: datetime | None = None
 
-
-# --- SCHÉMAS PUBLICS (page Communauté) : ne jamais exposer users_id ---
 
 class PublicGameOut(BaseModel):
     id: int

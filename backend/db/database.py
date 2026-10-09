@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.engine import make_url
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import BigInteger, Integer, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -28,6 +26,8 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+BigIntPK = BigInteger().with_variant(Integer, "sqlite")
 
 def get_db():
     db = SessionLocal()

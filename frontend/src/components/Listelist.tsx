@@ -39,10 +39,10 @@ function ListesList({
         <article className="Listes__card">
           <Heart className="Listes__icon" size={20} aria-hidden="true" />
           <h3>Likes</h3>
-          <button type="button">
+          <span className="Listes__badge">
             <LockOpen className="Listes__icon" size={20} aria-hidden="true" />
             <span>Public</span>
-          </button>
+          </span>
         </article>
       </Link>
 
@@ -50,17 +50,17 @@ function ListesList({
         <article className="Listes__card">
           <Star className="Listes__icon" size={20} aria-hidden="true" />
           <h3>Favoris</h3>
-          <button type="button">
+          <span className="Listes__badge">
             <Lock className="Listes__icon" size={20} aria-hidden="true" />
             <span>Privé</span>
-          </button>
+          </span>
         </article>
       </Link>
 
       {listes.map((items) => (
-          <article className="Listes__card">
+          <article className="Listes__card" key={items.id}>
             <Folder className="Listes__icon" size={20} aria-hidden="true" />
-            <Link key={items.id} to={`/listes/${items.liste_title}`}>
+            <Link to={`/listes/${encodeURIComponent(items.liste_title)}`}>
               <h3>{items.liste_title}</h3>
             </Link>
 

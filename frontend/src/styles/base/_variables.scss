@@ -1,55 +1,41 @@
-// ============================================================
-// FastGame — Design System "Style V2-B" (Dark Gaming)
-// Direction : fond sombre, corail lumineux, typo Fraunces + Inter
-// ============================================================
 :root {
-	// --- Surfaces ---
-	--color-page: #0b0d10; // fond de page (body)
-	--color-paper: #12151b; // surface des cartes / panneaux
-	--color-raised: #171b23; // surface surélevée (inputs, menus, badges)
-	--color-ink: #e8eaf0; // texte principal (inversé vs thème clair)
-	--color-copy: #9aa3b2; // texte secondaire
-	--color-muted: #6b7484; // texte tertiaire / placeholders
-	--color-line: #262d38; // bordures standard
-	--color-line-strong: #39414f; // bordures au survol
+	--color-page: #0b0d10;
+	--color-paper: #12151b;
+	--color-raised: #171b23;
+	--color-ink: #e8eaf0;
+	--color-copy: #9aa3b2;
+	--color-muted: #6b7484;
+	--color-line: #262d38;
+	--color-line-strong: #39414f;
 
-	// --- Accents ---
 	--color-coral: #ff5c3a;
 	--color-coral-light: #ff8a6e;
 	--color-violet: #7c5cff;
 	--color-danger: #ff5470;
 
-	// --- Surfaces héritées (anciens tokens teal, en dark) ---
-	--color-teal-soft: #232a35; // aplats offset / placeholders
-	--color-teal-pale: #1a2029; // arrière-plans d'images
+	--color-teal-soft: #232a35;
+	--color-teal-pale: #1a2029;
 
-	// --- Footer ---
 	--color-footer: #07080b;
 	--color-footer-line: #262d38;
 	--color-footer-copy: #6b7484;
 
-	// --- Typographie ---
 	--font-body: "Inter", system-ui, -apple-system, sans-serif;
 	--font-ui: "Inter", system-ui, -apple-system, sans-serif;
 	--font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
-	// --- Layout ---
 	--content-width: 82rem;
 
-	// --- Rayons ---
 	--radius-card: 16px;
 	--radius-control: 10px;
 	--radius-pill: 999px;
 
-	// --- Ombres & glows ---
 	--shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.5);
 	--shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
 	--shadow-card-hover: 0 18px 44px rgba(0, 0, 0, 0.6),
 		0 0 0 1px rgba(255, 92, 58, 0.3), 0 0 34px rgba(255, 92, 58, 0.14);
 	--glow-coral: 0 0 18px rgba(255, 92, 58, 0.45);
 
-	// --- Motion ---
 	--ease: cubic-bezier(0.4, 0, 0.2, 1);
 	--loader-bg: #0b0d10;
 }
-

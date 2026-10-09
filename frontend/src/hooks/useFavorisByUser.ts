@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type Game from "../models/game";
 import type { FavoriWithGame } from "../models/favoris";
+import { API_URL } from "../utils/api";
 
 const useFavorisByUser = () => {
   const { authFetch } = useAuth();
@@ -10,28 +11,27 @@ const useFavorisByUser = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    authFetch(`${import.meta.env.VITE_API_URL}/api/favoris/me/games`)
+    authFetch(`${API_URL}/api/favoris/me/games`)
       .then((res) => {
         if (!res.ok)
           throw new Error("Erreur lors de la récupération des favoris");
-        return res.json();
+        return res.json() as Promise<FavoriWithGame[]>;
       })
-      .then((data: FavoriWithGame[]) => {
-        const mappedGames: Game[] = data.map((item) => ({
-          id: item.game_id,
-          titre: item.titre ?? null,
-          studio: item.studio ?? null,
-          plateforme: item.plateforme ?? null,
-          annee: item.annee ? String(item.annee) : null,
-          genre: item.genre ?? null,
-          image: item.image ?? null,
-          url: item.url ?? null,
-        }));
-
-        return mappedGames;
-      })
-      .then(setGames)
-      .catch((err) => setError((err as Error).message))
+      .then((data) =>
+        setGames(
+          data.map((item) => ({
+            id: item.game_id,
+            titre: item.titre,
+            studio: item.studio,
+            plateforme: item.plateforme,
+            annee: item.annee,
+            genre: item.genre,
+            image: item.image,
+            url: item.url,
+          })),
+        ),
+      )
+      .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
   }, [authFetch]);
 

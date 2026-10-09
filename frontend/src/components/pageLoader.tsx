@@ -27,14 +27,12 @@ export default function PageLoader({ loading, children }: loadingProps) {
 
   return (
     <div className="page-container">
-      {/* 1. L'overlay de chargement */}
       {isOverlayVisible && (
         <div className={`loader-overlay ${!loading ? "fade-out" : ""}`}>
           <div className="spinner"></div>
         </div>
       )}
 
-      {/* 2. Le contenu de la page */}
       <main className={`page-content ${isContentVisible ? "visible" : ""}`}>
         {children}
       </main>

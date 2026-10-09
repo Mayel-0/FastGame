@@ -32,15 +32,6 @@ def serialize_like_with_game(like: LikeModel, game: GameModel | None = None):
     }
 
 
-# =========================================================
-# ROUTE PUBLIQUE (page Communauté, sans authentification)
-# ATTENTION : /top doit rester AVANT /{game_id}, sinon FastAPI
-# lit "top" comme un game_id (erreur 422).
-# =========================================================
-
-# ---------------------------------------------------------
-# GET /api/likes/top : jeux les plus likés
-# ---------------------------------------------------------
 @router.get("/top", response_model=list[LikedGameOut])
 def get_most_liked_games(
     limit: int = Query(10, ge=1, le=50),
@@ -68,10 +59,6 @@ def get_most_liked_games(
         for game_id, titre, image, likes in rows
     ]
 
-
-# =========================================================
-# ROUTES PERSONNELLES / PAR JEU
-# =========================================================
 
 @router.get("/me")
 def get_my_likes(
@@ -116,7 +103,6 @@ def get_like_status(
     return {"liked": like is not None}
 
 
-# 1. AJOUTER UN LIKE (POST)
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_like(
     like_data: LikeCreateSchema,
@@ -125,7 +111,6 @@ def add_like(
 ):
     """Permet à l'utilisateur connecté d'ajouter un like sur un jeu"""
 
-    # Le jeu existe
     if not db.get(GameModel, like_data.game_id):
         raise HTTPException(status_code=404, detail="Jeu introuvable.")
 
@@ -146,7 +131,6 @@ def add_like(
     try:
         db.commit()
     except IntegrityError:
-        # Requête simultanée : la contrainte unique (user_id, game_id) a bloqué le doublon
         db.rollback()
         raise HTTPException(status_code=400, detail="Tu as déjà liké ce jeu.")
     db.refresh(new_like)
@@ -154,7 +138,6 @@ def add_like(
     return {"message": "Like ajouté avec succès", "like_id": new_like.id}
 
 
-# 2. SUPPRIMER UN LIKE (DELETE)
 @router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_like(
     game_id: int,
@@ -176,7 +159,6 @@ def remove_like(
     return None
 
 
-# 3. OBTENIR LES LIKES D'UN JEU SPÉCIFIQUE (GET)
 @router.get("/game/{game_id}")
 def get_game_likes(
     game_id: int,

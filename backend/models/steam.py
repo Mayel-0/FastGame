@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from db.database import Base
 
@@ -19,14 +19,12 @@ class SteamAccountModel(Base):
     user = relationship("UserModel", back_populates="steam_account")
 
 
-# Schémas Pydantic
 class SteamAccountSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     steam_id: str
     steam_name: str | None = None
     avatar_url: str | None = None
     linked_at: datetime | None = None
-
-    class Config:
-        from_attributes = True

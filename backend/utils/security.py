@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from dotenv import load_dotenv
-from jose import JWTError, jwt
+from jose import jwt
 import bcrypt
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -12,9 +12,10 @@ if not SECRET_KEY or len(SECRET_KEY) < 64:
     raise RuntimeError("JWT_SECRET_KEY doit contenir au moins 64 caracteres dans backend/.env")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # Le token expire au bout de 24h
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+
+
 def hash_password(password: str):
-    # On encode en bytes et on gère la limite de bcrypt (72 octets max)
     pwd_bytes = password.encode('utf-8')[:72]
     hashed = bcrypt.hashpw(pwd_bytes, bcrypt.gensalt())
     return hashed.decode('utf-8')

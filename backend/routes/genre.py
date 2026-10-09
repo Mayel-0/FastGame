@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
 from db.database import get_db
 from models.game import GameModel, GameSchema
 from routes.notes import attach_game_notes
@@ -12,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get("/genre/{genre}", response_model=List[GameSchema])
+@router.get("/genre/{genre}", response_model=list[GameSchema])
 def get_games_by_genre(genre: str, db: Session = Depends(get_db)):
     """Récupère les jeux par leur genre (gère les espaces et la casse, ex: /api/jeux/genre/simulation)"""
     search_query = genre.replace(" ", "")

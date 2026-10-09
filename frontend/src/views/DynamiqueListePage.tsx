@@ -18,7 +18,6 @@ function DynamiqueListePage() {
   const { games: GameFavoris, loading: loadingFavoris } = useFavorisByUser();
   const { joinedLists, loading: loadingLists } = useUserLists();
 
-  // Route publique : /listes/public/:listId (listes de la communauté)
   const hasPublicParam = listId !== undefined;
   const parsedListId = Number(listId);
   const isValidPublicId = Number.isInteger(parsedListId) && parsedListId > 0;
@@ -37,8 +36,6 @@ function DynamiqueListePage() {
     loadingPublic,
   ].some(Boolean);
 
-  // useLikeStatus toujours appelé, mais avec [] pendant le loading
-  // (le hook gère déjà gameIds.length === 0 proprement)
   const getGamesByTitle = (): Game[] | "INVALID_ROUTE" => {
     if (title === "likes") return GameLikes;
     if (title === "favoris") return GameFavoris;
@@ -55,11 +52,9 @@ function DynamiqueListePage() {
 
   const gamesOrInvalid = isLoadingData ? [] : getGamesForRoute();
   const games = Array.isArray(gamesOrInvalid) ? gamesOrInvalid : [];
-  const gameIds = games.map((g) => g.id);
 
-  const { likes, toggleLike } = useLikeStatus(gameIds);
+  const { likes, toggleLike } = useLikeStatus();
 
-  // Guards conditionnels après tous les hooks
   if (isLoadingData) {
     return (
       <main className="list-page">

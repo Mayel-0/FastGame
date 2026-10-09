@@ -1,44 +1,48 @@
-// hooks/useLikeStatus.ts
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../utils/api";
 
-const useLikeStatus = (gameIds: number[]) => {
+const useLikeStatus = () => {
   const { isAuthenticated, authFetch } = useAuth();
   const [likes, setLikes] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || gameIds.length === 0) {
+    if (!isAuthenticated) {
       setLikes({});
       return;
     }
 
+    let cancelled = false;
     setLoading(true);
 
-    authFetch(`${import.meta.env.VITE_API_URL}/api/likes/me`)
-      .then((res) => res.json())
-      .then((data: { game_id: number }[]) => {
-        const likedIds = new Set(data.map((l) => l.game_id));
-
-        const likesMap = Object.fromEntries(
-          gameIds.map((id) => [id, likedIds.has(id)]),
-        );
-
-        setLikes(likesMap);
+    authFetch(`${API_URL}/api/likes/me`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        return res.json() as Promise<{ game_id: number }[]>;
       })
-      .catch(() => setLikes({}))
-      .finally(() => setLoading(false));
-  }, [isAuthenticated, gameIds.length]);
+      .then((data) => {
+        if (cancelled) return;
+        setLikes(Object.fromEntries(data.map((like) => [like.game_id, true])));
+      })
+      .catch(() => {
+        if (!cancelled) setLikes({});
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, authFetch]);
 
   const toggleLike = useCallback(
     async (gameId: number) => {
-      const isLiked = likes[gameId];
+      const isLiked = likes[gameId] ?? false;
       const response = isLiked
-        ? await authFetch(
-            `${import.meta.env.VITE_API_URL}/api/likes/${gameId}`,
-            { method: "DELETE" },
-          )
-        : await authFetch(`${import.meta.env.VITE_API_URL}/api/likes/`, {
+        ? await authFetch(`${API_URL}/api/likes/${gameId}`, { method: "DELETE" })
+        : await authFetch(`${API_URL}/api/likes/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ game_id: gameId }),

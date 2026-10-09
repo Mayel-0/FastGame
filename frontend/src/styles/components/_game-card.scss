@@ -1,7 +1,3 @@
-// ============================================================
-// Composant : game-card (carte d'un jeu dans les grilles)
-// Style V2-B : surface sombre, rayon 16px, glow corail au survol
-// ============================================================
 .game-card {
 	position: relative;
 	z-index: 1;
@@ -25,7 +21,6 @@
 		box-shadow: var(--shadow-card-hover);
 	}
 
-	// --- Média (pochette) ---
 	&__media {
 		position: relative;
 		aspect-ratio: 16 / 10;
@@ -41,7 +36,6 @@
 			transition: transform 0.55s var(--ease), filter 0.4s ease;
 		}
 
-		// Voile dégradé révélé au survol (lisibilité du badge genre)
 		&::after {
 			content: "";
 			position: absolute;
@@ -92,7 +86,6 @@
 		-webkit-backdrop-filter: blur(6px);
 	}
 
-	// --- Corps ---
 	&__body {
 		display: flex;
 		flex: 1;
@@ -170,7 +163,6 @@
 		}
 	}
 
-	// --- Actions (like + menu liste) ---
 	&__actions {
 		display: flex;
 		align-items: end;
@@ -209,7 +201,6 @@
 		}
 	}
 
-	// --- Dropdown "Ajouter à une liste" ---
 	&__dropdown {
 		position: absolute;
 		top: calc(100% + 0.45rem);
@@ -257,7 +248,6 @@
 		}
 	}
 
-	// --- Variante "fiche détail" ---
 	&--details {
 		max-width: 100%;
 	}
@@ -296,4 +286,3 @@
 		transform: none;
 	}
 }
-

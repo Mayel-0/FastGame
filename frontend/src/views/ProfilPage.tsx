@@ -3,7 +3,7 @@ import UserDetails from "../components/userDetails";
 import { useAuth } from "../context/AuthContext";
 import useUserById from "../hooks/useUserById";
 import PageLoader from "../components/pageLoader";
-import useLikeByuser from "../hooks/useLikeByUser";
+import useLikeByUser from "../hooks/useLikeByUser";
 import useLikeStatus from "../hooks/useLikeStatus";
 import GameList from "../components/gameList";
 import CommunityPublicLists from "../components/CommunityPublicLists";
@@ -17,24 +17,22 @@ function ProfilPage() {
   const isValidUserId = parsedUserId === null || (Number.isInteger(parsedUserId) && parsedUserId > 0);
   const targetId = isValidUserId ? parsedUserId : null;
   const { user, loading: loadingUser, error } = useUserById(targetId);
-  const { LikeUser, loading: loadingLikes } = useLikeByuser({ users_id: targetId });
-  const {ListUser, loading: loadingList} = usePublicListsByUser({ users_id: targetId });
+  const { data: userLikes, loading: loadingLikes } = useLikeByUser(targetId);
+  const { data: userLists, loading: loadingLists } = usePublicListsByUser(targetId);
+  const { likes, toggleLike } = useLikeStatus();
 
-  const gameIds = LikeUser.map((g) => g.id);
-  const Games = LikeUser.map((g) => ({
-    id: g.game_id,
-    titre: g.titre,
-    studio: g.studio,
-    plateforme: g.plateforme,
-    annee: g.annee,
-    genre: g.genre,
-    image: g.image,
-    url: g.url,
+  const games = (userLikes ?? []).map((like) => ({
+    id: like.game_id,
+    titre: like.titre,
+    studio: like.studio,
+    plateforme: like.plateforme,
+    annee: like.annee,
+    genre: like.genre,
+    image: like.image,
+    url: like.url,
   }));
-  const { likes, toggleLike } = useLikeStatus(gameIds);
 
-
-  const isLoading = loadingUser || loadingLikes || loadingList || (!routeUserId && loadingCurrentUser);
+  const isLoading = loadingUser || loadingLikes || loadingLists || (!routeUserId && loadingCurrentUser);
 
   return (
     <PageLoader loading={isLoading}>
@@ -44,19 +42,19 @@ function ProfilPage() {
         </main>
       ) : !isLoading && user ? (
         <main className="profile-page">
-          <UserDetails profil={user} currentUser={currentUser} likes={LikeUser}/>
+          <UserDetails profil={user} currentUser={currentUser} />
           <section className="profile-page__games" aria-labelledby="profile-games-title">
             <header className="profile-page__section-header">
               <p className="profile-page__eyebrow">Sa collection</p>
               <h2 className="profile-page__section-title" id="profile-games-title">Jeux aimés</h2>
             </header>
-            {Games.length > 0 ? (
-              <GameList onToggleLike={toggleLike} likes={likes} games={Games} />
+            {games.length > 0 ? (
+              <GameList onToggleLike={toggleLike} likes={likes} games={games} />
             ) : (
               <p className="profile-page__empty">Aucun jeu aimé à afficher pour le moment.</p>
             )}
           </section>
-          <CommunityPublicLists lists={ListUser}/>
+          <CommunityPublicLists lists={userLists} />
         </main>
       ) : null}
     </PageLoader>

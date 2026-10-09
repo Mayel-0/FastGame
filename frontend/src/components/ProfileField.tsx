@@ -36,7 +36,7 @@ function ProfileField({ label, value, type = "text", editable, onSave }: Profile
     return (
       <div className="profile-field">
         <span className="profile-field__label">{label}</span>
-        <span className="profile-field__value">{type === "password" ? "••••••••" : value || "Non renseigne"}</span>
+        <span className="profile-field__value">{type === "password" ? "••••••••" : value || "Non renseigné"}</span>
       </div>
     );
   }
@@ -65,7 +65,7 @@ function ProfileField({ label, value, type = "text", editable, onSave }: Profile
         </div>
       ) : (
         <div className="profile-field__display">
-          <span className="profile-field__value">{type === "password" ? "••••••••" : value || "Non renseigne"}</span>
+          <span className="profile-field__value">{type === "password" ? "••••••••" : value || "Non renseigné"}</span>
           <button type="button" onClick={() => setIsEditing(true)}>Modifier</button>
         </div>
       )}

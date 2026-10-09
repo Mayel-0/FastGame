@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
 from db.database import get_db
 from models.game import GameModel, GameSchema
 from routes.notes import attach_game_notes
@@ -12,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get("/search/{title}", response_model=List[GameSchema])
+@router.get("/search/{title}", response_model=list[GameSchema])
 def search_games_by_title(title: str, db: Session = Depends(get_db)):
     """Recherche des jeux par leur titre (gère les espaces et la casse)"""
     search_query = title.replace(" ", "")

@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Liste, ListItem, JoinedListe } from "../models/liste";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../utils/api";
 
 export const useUserLists = () => {
   const { authFetch } = useAuth();
@@ -13,9 +12,6 @@ export const useUserLists = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ---------------------------------------------------------
-  // 1. GET /api/lists/me (Listes simples de l'utilisateur)
-  // ---------------------------------------------------------
   const fetchMyLists = useCallback(async () => {
     setError(null);
     try {
@@ -30,9 +26,6 @@ export const useUserLists = () => {
     }
   }, [authFetch]);
 
-  // ---------------------------------------------------------
-  // 2. GET /api/lists/me/items (Items bruts de l'utilisateur)
-  // ---------------------------------------------------------
   const fetchMyItems = useCallback(async () => {
     setError(null);
     try {
@@ -46,9 +39,6 @@ export const useUserLists = () => {
     }
   }, [authFetch]);
 
-  // ---------------------------------------------------------
-  // 3. GET /api/lists/me/joined (Listes avec jeux joints)
-  // ---------------------------------------------------------
   const fetchJoinedLists = useCallback(async () => {
     setError(null);
     try {
@@ -57,16 +47,12 @@ export const useUserLists = () => {
         throw new Error("Erreur lors de la récupération des listes jointes.");
       const data: JoinedListe[] = await res.json();
       setJoinedLists(data);
-      console.log("fetchJoinedLists data:", data);
       return data;
     } catch (err) {
       setError((err as Error).message);
     }
   }, [authFetch]);
 
-  // ---------------------------------------------------------
-  // 4. POST /api/lists/ (Créer une nouvelle liste)
-  // ---------------------------------------------------------
   const createList = async (listeTitle: string, isPublic: boolean = true) => {
     setError(null);
     try {
@@ -91,9 +77,6 @@ export const useUserLists = () => {
     }
   };
 
-  // ---------------------------------------------------------
-  // 5. PATCH /api/lists/{list_id} (Modifier le titre ou le statut d'une liste)
-  // ---------------------------------------------------------
   const updateList = async (
     listId: number,
     data: { liste_title?: string; public?: boolean },
@@ -121,9 +104,6 @@ export const useUserLists = () => {
     }
   };
 
-  // ---------------------------------------------------------
-  // 6. DELETE /api/lists/{list_id} (Supprimer une liste)
-  // ---------------------------------------------------------
   const deleteList = async (listId: number) => {
     setError(null);
     try {
@@ -147,9 +127,6 @@ export const useUserLists = () => {
     }
   };
 
-  // ---------------------------------------------------------
-  // 7. POST /api/lists/me/items (Ajouter un jeu dans une liste)
-  // ---------------------------------------------------------
   const addItemToList = async (listId: number, gameId: number) => {
     setError(null);
     try {
@@ -172,9 +149,6 @@ export const useUserLists = () => {
     }
   };
 
-  // ---------------------------------------------------------
-  // 8. DELETE /api/lists/me/items/{list_id}/{game_id} (Retirer un jeu)
-  // ---------------------------------------------------------
   const removeItemFromList = async (listId: number, gameId: number) => {
     setError(null);
     try {
@@ -192,7 +166,6 @@ export const useUserLists = () => {
         );
       }
 
-      // Mise à jour de l'état local pour un affichage instantané
       setJoinedLists((prev) =>
         prev.map((list) => {
           if (list.list_id === listId) {

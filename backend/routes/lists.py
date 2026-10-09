@@ -1,6 +1,5 @@
-from sqlalchemy import func, or_
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,7 +25,10 @@ router = APIRouter(
 )
 
 
-def _get_list_like_counts(db: Session, list_ids: list[int]) -> dict[int, int]:
+PREVIEW_SIZE = 4
+
+
+def get_list_like_counts(db: Session, list_ids: list[int]) -> dict[int, int]:
     if not list_ids:
         return {}
 
@@ -39,13 +41,24 @@ def _get_list_like_counts(db: Session, list_ids: list[int]) -> dict[int, int]:
     return dict(rows)
 
 
-# =========================================================
-# ROUTES PERSONNELLES (authentification requise)
-# =========================================================
+def get_list_previews(db: Session, list_ids: list[int]) -> dict[int, list[str]]:
+    if not list_ids:
+        return {}
 
-# ---------------------------------------------------------
-# GET /api/lists/me : listes créées par l'utilisateur
-# ---------------------------------------------------------
+    images = (
+        db.query(ListeItemModel.id_list, GameModel.image)
+        .join(GameModel, GameModel.id == ListeItemModel.id_item)
+        .filter(ListeItemModel.id_list.in_(list_ids))
+        .all()
+    )
+    previews: dict[int, list[str]] = {}
+    for list_id, image in images:
+        bucket = previews.setdefault(list_id, [])
+        if image and len(bucket) < PREVIEW_SIZE:
+            bucket.append(image)
+    return previews
+
+
 @router.get("/me", response_model=list[ListeResponseSchema])
 def get_my_lists(
     current_user: UserModel = Depends(get_current_user),
@@ -55,9 +68,6 @@ def get_my_lists(
     return db.query(ListeModel).filter(ListeModel.users_id == current_user.id).all()
 
 
-# ---------------------------------------------------------
-# GET /api/lists/me/items : enregistrements bruts de liste_items
-# ---------------------------------------------------------
 @router.get("/me/items")
 def get_my_list_items(
     current_user: UserModel = Depends(get_current_user),
@@ -67,9 +77,6 @@ def get_my_list_items(
     return db.query(ListeItemModel).filter(ListeItemModel.id_user == current_user.id).all()
 
 
-# ---------------------------------------------------------
-# GET /api/lists/me/joined : listes + jeux associés
-# ---------------------------------------------------------
 @router.get("/me/joined")
 def get_my_lists_with_items(
     current_user: UserModel = Depends(get_current_user),
@@ -112,9 +119,6 @@ def get_my_lists_with_items(
     return result
 
 
-# ---------------------------------------------------------
-# POST /api/lists/me/items : ajouter un jeu dans une liste
-# ---------------------------------------------------------
 @router.post("/me/items", status_code=status.HTTP_201_CREATED)
 def add_item_to_list(
     item_data: ListItemCreateSchema,
@@ -122,7 +126,6 @@ def add_item_to_list(
     db: Session = Depends(get_db)
 ):
     """Ajouter un jeu dans une liste appartenant à l'utilisateur connecté."""
-    # La liste existe et appartient à l'utilisateur
     user_list = db.query(ListeModel).filter(
         ListeModel.id == item_data.list_id,
         ListeModel.users_id == current_user.id
@@ -131,11 +134,9 @@ def add_item_to_list(
     if not user_list:
         raise HTTPException(status_code=404, detail="Liste introuvable ou accès non autorisé.")
 
-    # Le jeu existe
     if not db.get(GameModel, item_data.game_id):
         raise HTTPException(status_code=404, detail="Jeu introuvable.")
 
-    # Le jeu n'est pas déjà dans la liste
     existing_item = db.query(ListeItemModel).filter(
         ListeItemModel.id_item == item_data.game_id,
         ListeItemModel.id_list == item_data.list_id,
@@ -157,16 +158,12 @@ def add_item_to_list(
     try:
         db.commit()
     except IntegrityError:
-        # Requête simultanée : la clé primaire (id_item, id_list) a bloqué le doublon
         db.rollback()
         raise HTTPException(status_code=400, detail="Ce jeu est déjà présent dans cette liste.")
 
     return {"message": "Jeu ajouté à la liste avec succès"}
 
 
-# ---------------------------------------------------------
-# DELETE /api/lists/me/items/{list_id}/{game_id} : retirer un jeu
-# ---------------------------------------------------------
 @router.delete("/me/items/{list_id}/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_item_from_list(
     list_id: int,
@@ -185,7 +182,7 @@ def remove_item_from_list(
         raise HTTPException(status_code=404, detail="Élément introuvable dans cette liste.")
 
     user_list = db.query(ListeModel).filter(ListeModel.id == list_id).first()
-    if user_list and user_list.items_count > 0:
+    if user_list and (user_list.items_count or 0) > 0:
         user_list.items_count -= 1
 
     db.delete(item)
@@ -194,28 +191,12 @@ def remove_item_from_list(
     return None
 
 
-# =========================================================
-# ROUTES PUBLIQUES (page Communauté, sans authentification)
-# Si la page doit être réservée aux connectés, ajouter :
-#   current_user: UserModel = Depends(get_current_user)
-# ATTENTION : /public/random doit rester AVANT /public/{list_id}
-# =========================================================
-
-# ---------------------------------------------------------
-# GET /api/lists/public/random : listes publiques aléatoires
-# ---------------------------------------------------------
-
-
-# ---------------------------------------------------------
-# GET /api/lists/user/{user_id} : listes publiques d'un utilisateur
-# ---------------------------------------------------------
 @router.get("/user/{user_id}", response_model=list[PublicListOut])
 def get_public_lists_by_user(
     user_id: int,
     db: Session = Depends(get_db)
 ):
     """Obtenir toutes les listes publiques non vides d'un utilisateur spécifique."""
-    # 1. Vérifier si l'utilisateur existe
     owner = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not owner:
         raise HTTPException(
@@ -223,7 +204,6 @@ def get_public_lists_by_user(
             detail="Utilisateur introuvable."
         )
 
-    # 2. Récupérer uniquement les listes publiques de cet utilisateur
     rows = (
         db.query(ListeModel)
         .filter(
@@ -238,23 +218,10 @@ def get_public_lists_by_user(
     if not rows:
         return []
 
-    # 3. Récupérer les 4 premières images de couverture par liste en 1 seule requête
     list_ids = [user_list.id for user_list in rows]
-    like_counts = _get_list_like_counts(db, list_ids)
-    images = (
-        db.query(ListeItemModel.id_list, GameModel.image)
-        .join(GameModel, GameModel.id == ListeItemModel.id_item)
-        .filter(ListeItemModel.id_list.in_(list_ids))
-        .all()
-    )
+    like_counts = get_list_like_counts(db, list_ids)
+    previews = get_list_previews(db, list_ids)
 
-    previews: dict[int, list[str]] = {}
-    for list_id, image in images:
-        bucket = previews.setdefault(list_id, [])
-        if image and len(bucket) < 4:
-            bucket.append(image)
-
-    # 4. Formater selon le schéma PublicListOut
     return [
         {
             "list_id": user_list.id,
@@ -276,7 +243,6 @@ def get_random_public_lists(
     db: Session = Depends(get_db)
 ):
     """Tirer au hasard des listes publiques non vides."""
-    # NB : func.random() fonctionne sur PostgreSQL et SQLite (MySQL : func.rand())
     rows = (
         db.query(ListeModel, UserModel.id, UserModel.username, UserModel.image_url)
         .join(UserModel, UserModel.id == ListeModel.users_id)
@@ -288,20 +254,9 @@ def get_random_public_lists(
     if not rows:
         return []
 
-    # Une seule requête pour toutes les pochettes (évite le N+1)
     list_ids = [user_list.id for user_list, _, _, _ in rows]
-    like_counts = _get_list_like_counts(db, list_ids)
-    images = (
-        db.query(ListeItemModel.id_list, GameModel.image)
-        .join(GameModel, GameModel.id == ListeItemModel.id_item)
-        .filter(ListeItemModel.id_list.in_(list_ids))
-        .all()
-    )
-    previews: dict[int, list[str]] = {}
-    for list_id, image in images:
-        bucket = previews.setdefault(list_id, [])
-        if image and len(bucket) < 4:
-            bucket.append(image)
+    like_counts = get_list_like_counts(db, list_ids)
+    previews = get_list_previews(db, list_ids)
 
     return [
         {
@@ -323,7 +278,6 @@ def _escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-# GET /api/lists/public/search?q=... : listes publiques par titre OU par pseudo
 @router.get("/public/search", response_model=list[PublicListOut])
 def search_public_lists(
     q: str | None = Query(None, min_length=2, max_length=50),
@@ -355,20 +309,9 @@ def search_public_lists(
     if not rows:
         return []
 
-    # Une seule requête pour les pochettes (4 max par liste)
     list_ids = [user_list.id for user_list, _, _ in rows]
-    like_counts = _get_list_like_counts(db, list_ids)
-    images = (
-        db.query(ListeItemModel.id_list, GameModel.image)
-        .join(GameModel, GameModel.id == ListeItemModel.id_item)
-        .filter(ListeItemModel.id_list.in_(list_ids))
-        .all()
-    )
-    previews: dict[int, list[str]] = {}
-    for list_id, image in images:
-        bucket = previews.setdefault(list_id, [])
-        if image and len(bucket) < 4:
-            bucket.append(image)
+    like_counts = get_list_like_counts(db, list_ids)
+    previews = get_list_previews(db, list_ids)
 
     return [
         {
@@ -384,9 +327,6 @@ def search_public_lists(
         for user_list, username, owner_image_url in rows
     ]
 
-# ---------------------------------------------------------
-# GET /api/lists/public/{list_id} : détail d'une liste publique
-# ---------------------------------------------------------
 @router.get("/public/{list_id}", response_model=PublicListDetailOut)
 def get_public_list(list_id: int, db: Session = Depends(get_db)):
     """Détail d'une liste publique. 404 si elle est privée ou inexistante (on ne révèle rien)."""
@@ -430,13 +370,6 @@ def get_public_list(list_id: int, db: Session = Depends(get_db)):
     }
 
 
-# =========================================================
-# GESTION DES LISTES (authentification requise)
-# =========================================================
-
-# ---------------------------------------------------------
-# POST /api/lists/ : créer une liste
-# ---------------------------------------------------------
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=ListeResponseSchema)
 def create_list(
     list_data: ListeCreateSchema,
@@ -458,9 +391,6 @@ def create_list(
     return new_list
 
 
-# ---------------------------------------------------------
-# PATCH /api/lists/{list_id} : modifier titre / visibilité
-# ---------------------------------------------------------
 @router.patch("/{list_id}", response_model=ListeResponseSchema)
 def update_list(
     list_id: int,
@@ -488,9 +418,6 @@ def update_list(
     return user_list
 
 
-# ---------------------------------------------------------
-# DELETE /api/lists/{list_id} : supprimer une liste et ses items
-# ---------------------------------------------------------
 @router.delete("/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_list(
     list_id: int,
@@ -506,12 +433,10 @@ def delete_list(
     if not user_list:
         raise HTTPException(status_code=404, detail="Liste introuvable ou accès non autorisé.")
 
-    # 1. Supprimer tous les items de la liste (la propriété est déjà vérifiée ci-dessus)
     db.query(ListeItemModel).filter(ListeItemModel.id_list == list_id).delete()
+    db.query(ListeLikeModel).filter(ListeLikeModel.liste_id == list_id).delete()
 
-    # 2. Supprimer la liste elle-même
     db.delete(user_list)
     db.commit()
 
     return None
-

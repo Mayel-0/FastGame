@@ -1,14 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer
 from sqlalchemy.sql import func
 
 from db.database import Base
 from models.lists import PublicListOut
 
-
-# --- MODÈLE SQLALCHEMY ---
 
 class ListeLikeModel(Base):
     __tablename__ = "liste_likes"

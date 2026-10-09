@@ -1,50 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
-from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db.database import get_db
 from models.game import GameModel
-from models.notes import NoteModel, RankedGameOut
+from models.notes import NoteCreateSchema, NoteModel, RankedGameOut
 from models.users import UserModel
-from routes.users import get_current_user
-from utils.security import ALGORITHM, SECRET_KEY
-
-
-class NoteCreateSchema(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    id_game: int = Field(..., gt=0)
-    value: int = Field(..., ge=0, le=5)
-    # Le commentaire est visible par toute la communauté : on le borne
-    body: str | None = Field(default=None, max_length=1000)
-
+from routes.users import get_current_user, get_optional_current_user
 
 router = APIRouter(
     prefix="/api/notes",
     tags=["Notes"],
 )
-security = HTTPBearer(auto_error=False)
-
-
-def get_optional_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(security),
-    db: Session = Depends(get_db),
-):
-    if credentials is None:
-        return None
-
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        if email is None:
-            return None
-        return db.query(UserModel).filter(UserModel.email == email).first()
-    except JWTError:
-        return None
 
 
 def attach_game_notes(db: Session, games: list[GameModel]) -> list[GameModel]:
@@ -118,13 +86,6 @@ def get_ranked_games(
     ]
 
 
-# =========================================================
-# ROUTES PUBLIQUES (page Communauté, sans authentification)
-# =========================================================
-
-# ---------------------------------------------------------
-# GET /api/notes/top : jeux les mieux notés
-# ---------------------------------------------------------
 @router.get("/top", response_model=list[RankedGameOut])
 def get_top_rated_games(
     limit: int = Query(10, ge=1, le=50),
@@ -134,9 +95,6 @@ def get_top_rated_games(
     return get_ranked_games(db, best_first=True, limit=limit, min_ratings=min_ratings)
 
 
-# ---------------------------------------------------------
-# GET /api/notes/worst : jeux les moins bien notés
-# ---------------------------------------------------------
 @router.get("/worst", response_model=list[RankedGameOut])
 def get_worst_rated_games(
     limit: int = Query(10, ge=1, le=50),
@@ -145,10 +103,6 @@ def get_worst_rated_games(
 ):
     return get_ranked_games(db, best_first=False, limit=limit, min_ratings=min_ratings)
 
-
-# =========================================================
-# ROUTES PAR JEU / PAR NOTE
-# =========================================================
 
 @router.get("/game/{game_id}")
 def get_game_note(
@@ -246,7 +200,6 @@ def add_note(
     try:
         db.commit()
     except IntegrityError:
-        # Requête simultanée : la contrainte unique (id_game, id_user) a bloqué le doublon
         db.rollback()
         raise HTTPException(
             status_code=400,

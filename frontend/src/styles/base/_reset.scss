@@ -23,8 +23,6 @@ textarea {
 	font: inherit;
 }
 
-// Titres : typo display (Fraunces) par défaut,
-// surchargée au cas par cas dans les composants.
 h1,
 h2,
 h3 {
@@ -41,7 +39,6 @@ h3 {
 	outline-offset: 3px;
 }
 
-// Respect des préférences système : pas d'animation forcée.
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,

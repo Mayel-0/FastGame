@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type Game from "../models/game";
 import type { LikeWithGame } from "../models/likes";
+import { API_URL } from "../utils/api";
 
 const useLikesByUser = () => {
   const { authFetch } = useAuth();
@@ -10,29 +11,28 @@ const useLikesByUser = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    authFetch(`${import.meta.env.VITE_API_URL}/api/likes/me`)
+    authFetch(`${API_URL}/api/likes/me`)
       .then((res) => {
-        if (!res.ok) throw Error("Erreur récupération des likes");
-        return res.json();
+        if (!res.ok) throw new Error("Erreur lors de la récupération des likes");
+        return res.json() as Promise<LikeWithGame[]>;
       })
-      .then((data: LikeWithGame[]) => {
-        const mappedGames: Game[] = data.map((item) => ({
-          id: item.game_id,
-          titre: item.titre ?? null,
-          studio: item.studio ?? null,
-          plateforme: item.plateforme ?? null,
-          annee: item.annee ? String(item.annee) : null,
-          genre: item.genre ?? null,
-          image: item.image ?? null,
-          url: item.url ?? null,
-        }));
-
-        return mappedGames;
-      })
-      .then(setGames)
-      .catch(setError)
+      .then((data) =>
+        setGames(
+          data.map((item) => ({
+            id: item.game_id,
+            titre: item.titre,
+            studio: item.studio,
+            plateforme: item.plateforme,
+            annee: item.annee,
+            genre: item.genre,
+            image: item.image,
+            url: item.url,
+          })),
+        ),
+      )
+      .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [authFetch]);
 
   return { games, loading, error };
 };

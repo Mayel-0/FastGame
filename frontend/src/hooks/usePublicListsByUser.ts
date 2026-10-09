@@ -1,28 +1,7 @@
-import { useState, useEffect } from "react";
+import { useFetch } from "./useFetch";
 import type { PublicList } from "../models/community";
 
-interface propsUseLikeByuser {
-  users_id: number | null;
-}
-
-const usePublicListsByUser = ({ users_id }: propsUseLikeByuser) => {
-  const [ListUser, setListUser] = useState<PublicList[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    fetch(
-      `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/lists/user/${users_id}`,
-    )
-      .then((res) => {
-        if (!res.ok) throw Error("Erreur recuperation des jeux");
-        return res.json();
-      })
-      .then(setListUser)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { ListUser, loading, error };
-};
+const usePublicListsByUser = (userId: number | null) =>
+  useFetch<PublicList[]>(userId === null ? null : `/api/lists/user/${userId}`);
 
 export default usePublicListsByUser;
