@@ -29,3 +29,7 @@ class GameSchema(BaseModel):
     url: str | None = None
     note: float | None = None
     note_moyenne: float | None = None
+
+
+class RecommendedGameOut(GameSchema):
+    raison: str

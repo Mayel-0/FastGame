@@ -7,6 +7,8 @@ import useAllGame from "../hooks/useAllGame";
 import useLikeStatus from "../hooks/useLikeStatus";
 import useUserLists from "../hooks/useUserLists";
 import useFavoris from "../hooks/useFavoris";
+import useRecommendations from "../hooks/useRecommendations";
+import Recommendations from "../components/Recommendations";
 
 function HomePage() {
   const { games, loading: loadingGames, error } = useAllGame();
@@ -16,6 +18,7 @@ function HomePage() {
   const [search, setSearch] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("Tous");
   const { favorisMap, toggleFavori } = useFavoris();
+  const { games: recommendedGames } = useRecommendations();
 
   const isLoading = [loadingGames,loadingUser,loadingLikes,listsLoading].some(Boolean)
 
@@ -54,6 +57,8 @@ function HomePage() {
             <a className="home-page__hero-link" href="#games">Explorer les jeux</a>
           </div>
         </section>
+
+        <Recommendations games={recommendedGames} />
 
         <section className="home-page__catalog" id="games" aria-labelledby="catalog-title">
           <div className="home-page__catalog-heading">

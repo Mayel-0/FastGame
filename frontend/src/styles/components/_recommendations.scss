@@ -1,0 +1,99 @@
+.recommendations {
+	padding: 3rem clamp(1.25rem, 5vw, 5rem) 0;
+
+	&__header,
+	&__list {
+		max-width: var(--content-width);
+		margin: 0 auto;
+	}
+
+	&__header {
+		margin-bottom: 1.5rem;
+	}
+
+	&__eyebrow {
+		margin: 0 0 .4rem;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .72rem;
+		font-weight: 700;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+	}
+
+	&__list {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(14rem, 1fr);
+		gap: 1rem;
+		padding: 0 0 1rem;
+		overflow-x: auto;
+		list-style: none;
+		scroll-snap-type: x proximity;
+
+		li {
+			scroll-snap-align: start;
+		}
+	}
+
+	&__card {
+		display: grid;
+		height: 100%;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-card);
+		background: var(--color-paper);
+		color: inherit;
+		overflow: hidden;
+		text-decoration: none;
+		transition: transform .2s ease, box-shadow .2s ease;
+
+		&:hover {
+			transform: translateY(-4px);
+			box-shadow: var(--shadow-card-hover);
+		}
+	}
+
+	&__image {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		background: var(--color-teal-pale);
+		object-fit: cover;
+
+		&--empty {
+			display: grid;
+			place-items: center;
+			color: var(--color-muted);
+			font-family: var(--font-ui);
+			font-weight: 700;
+		}
+	}
+
+	&__copy {
+		display: grid;
+		gap: .35rem;
+		padding: .9rem 1rem 1.1rem;
+		font-family: var(--font-ui);
+	}
+
+	&__game-title {
+		color: var(--color-ink);
+		font-weight: 700;
+	}
+
+	&__reason {
+		color: var(--color-copy);
+		font-size: .82rem;
+	}
+
+	&__score {
+		color: var(--color-coral);
+		font-size: .82rem;
+		font-weight: 700;
+	}
+}
