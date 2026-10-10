@@ -1,0 +1,128 @@
+.notification-bell {
+	position: relative;
+
+	&__button {
+		position: relative;
+		display: inline-grid;
+		place-items: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-pill);
+		background: var(--color-raised);
+		color: var(--color-ink);
+		cursor: pointer;
+		transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+
+		&:hover {
+			border-color: var(--color-coral);
+			color: var(--color-coral);
+			transform: translateY(-2px);
+		}
+	}
+
+	&__count {
+		position: absolute;
+		top: -0.3rem;
+		right: -0.3rem;
+		display: grid;
+		place-items: center;
+		min-width: 1.15rem;
+		height: 1.15rem;
+		padding: 0 0.25rem;
+		border-radius: var(--radius-pill);
+		background: var(--color-coral);
+		color: #160603;
+		font-family: var(--font-ui);
+		font-size: 0.65rem;
+		font-weight: 700;
+	}
+
+	&__panel {
+		position: absolute;
+		top: calc(100% + 0.6rem);
+		right: 0;
+		z-index: 40;
+		width: min(22rem, calc(100vw - 2rem));
+		max-height: 26rem;
+		padding: 0.5rem;
+		border: 1px solid var(--color-line);
+		border-radius: 12px;
+		background: var(--color-raised);
+		box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+		overflow-y: auto;
+	}
+
+	&__label {
+		margin: 0;
+		padding: 0.35rem 0.55rem 0.5rem;
+		color: var(--color-muted);
+		font-family: var(--font-ui);
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	&__empty {
+		margin: 0;
+		padding: 0.75rem 0.55rem;
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: 0.9rem;
+	}
+
+	&__list {
+		display: grid;
+		gap: 0.15rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.65rem;
+		padding: 0.65rem 0.55rem;
+		border-radius: 8px;
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: 0.88rem;
+		line-height: 1.4;
+		text-decoration: none;
+		transition: background-color 0.15s ease;
+
+		strong {
+			color: var(--color-ink);
+		}
+
+		&:hover {
+			background: rgba(255, 92, 58, 0.14);
+		}
+
+		&--unread {
+			background: rgba(124, 92, 255, 0.12);
+		}
+	}
+
+	&__avatar {
+		flex: 0 0 auto;
+		width: 2rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--color-teal-pale);
+		object-fit: cover;
+	}
+
+	&__copy {
+		display: grid;
+		gap: 0.2rem;
+		min-width: 0;
+	}
+
+	&__date {
+		color: var(--color-muted);
+		font-size: 0.75rem;
+	}
+}

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import ProfileDrawer from "./ProfileDrawer";
 import { Menu } from "lucide-react";
 import UserIdentity from "./UserIdentity";
+import NotificationBell from "./NotificationBell";
 
 function Header() {
   const { isAuthenticated, user } = useAuth();
@@ -52,6 +53,7 @@ function Header() {
         ) : (
           <div className="header__action-group">
             {user && <UserIdentity userId={user.id} username={user.username} imageUrl={user.image_url} />}
+            <NotificationBell />
             <button className="header__profile-menu" type="button" onClick={() => setIsProfileMenuOpen(true)} aria-label="Ouvrir le menu du profil" aria-expanded={isProfileMenuOpen} aria-controls="profile-drawer">
               <Menu size={20} aria-hidden="true" />
             </button>
