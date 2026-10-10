@@ -19,6 +19,10 @@ export interface Note {
   image_url?: string | null;
   value: number;
   body?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  likes_count: number;
+  liked_by_me: boolean;
 }
 
 export interface GameDetailsPayload {

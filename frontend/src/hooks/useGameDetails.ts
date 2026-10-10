@@ -127,6 +127,42 @@ export default function useGameDetails(slug?: string, initialGame?: Game | null)
     await refreshGame(game);
   }, [authFetch, game, refreshGame]);
 
+  const updateNote = useCallback(async (noteId: number, value: number, body: string) => {
+    if (!game) {
+      return;
+    }
+
+    const response = await authFetch(`${API_URL}/api/notes/${noteId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value, body: body.trim() || null }),
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.detail ?? "Impossible de modifier la note.");
+    }
+
+    await refreshGame(game);
+  }, [authFetch, game, refreshGame]);
+
+  const toggleNoteLike = useCallback(async (note: Note) => {
+    if (!game) {
+      return;
+    }
+
+    const response = await authFetch(`${API_URL}/api/notes/${note.id}/like`, {
+      method: note.liked_by_me ? "DELETE" : "POST",
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.detail ?? "Impossible de liker cet avis.");
+    }
+
+    await refreshGame(game);
+  }, [authFetch, game, refreshGame]);
+
   return {
     game,
     notes,
@@ -135,6 +171,8 @@ export default function useGameDetails(slug?: string, initialGame?: Game | null)
     loading,
     error,
     addNote,
+    updateNote,
     deleteNote,
+    toggleNoteLike,
   };
 }
