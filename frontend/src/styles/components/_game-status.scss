@@ -1,0 +1,61 @@
+.game-status {
+	display: grid;
+	gap: .75rem;
+	padding: 1.5rem;
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-card);
+	background: var(--color-paper);
+	box-shadow: var(--shadow-card);
+
+	&__eyebrow {
+		margin: 0;
+		color: var(--color-coral);
+		font-family: var(--font-ui);
+		font-size: .72rem;
+		font-weight: 700;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.6rem;
+	}
+
+	&__field select {
+		width: 100%;
+		padding: .75rem;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-control);
+		background: var(--color-raised);
+		color: var(--color-ink);
+		font: inherit;
+		cursor: pointer;
+
+		&:focus {
+			outline: 2px solid var(--color-coral);
+			outline-offset: 2px;
+		}
+
+		&:disabled {
+			cursor: wait;
+			opacity: .6;
+		}
+	}
+
+	&__hint {
+		margin: 0;
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: .9rem;
+	}
+
+	&__error {
+		margin: 0;
+		color: var(--color-danger);
+		font-family: var(--font-ui);
+		font-size: .9rem;
+		font-weight: 700;
+	}
+}
