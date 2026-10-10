@@ -95,7 +95,7 @@ Côté frontend, `VITE_API_URL` (dans `frontend/.env`) permet de pointer vers un
 ```bash
 cd backend
 source .venv/bin/activate
-python -m unittest tests/test_likes_join.py tests/test_session_cookie.py
+python -m unittest discover -s tests -t .
 ```
 
 Les tests utilisent une base SQLite en mémoire : ils ne touchent pas à la vraie base, mais le fichier `backend/.env` doit exister.

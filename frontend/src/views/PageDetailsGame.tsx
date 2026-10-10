@@ -20,7 +20,9 @@ function PageDetailsgame() {
     loading,
     error,
     addNote,
+    updateNote,
     deleteNote,
+    toggleNoteLike,
   } = useGameDetails(slug, initialGame);
 
   if (!game && !loading && !error) {
@@ -50,7 +52,9 @@ function PageDetailsgame() {
             averageNote={averageNote}
             isAuthenticated={isAuthenticated}
             onAddNote={addNote}
+            onUpdateNote={updateNote}
             onDeleteNote={deleteNote}
+            onToggleNoteLike={toggleNoteLike}
           />
         </main>
       )}
