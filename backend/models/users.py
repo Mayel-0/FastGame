@@ -54,6 +54,22 @@ class TopUserSchema(BaseModel):
     likes_received: int
 
 
+class RatingCountSchema(BaseModel):
+    value: int
+    count: int
+
+
+class UserStatsSchema(BaseModel):
+    ratings_count: int
+    average_rating: float | None = None
+    likes_count: int
+    public_lists_count: int
+    followers_count: int
+    following_count: int
+    favorite_genre: str | None = None
+    ratings_distribution: list[RatingCountSchema]
+
+
 class UserCreateSchema(BaseModel):
     email: str = Field(min_length=3, max_length=320)
     password: str = Field(min_length=8, max_length=72)

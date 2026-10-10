@@ -1,0 +1,114 @@
+.profile-stats {
+	&__tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+		gap: 1rem;
+		margin: 0 0 1.5rem;
+	}
+
+	&__tile {
+		display: grid;
+		gap: .35rem;
+		padding: 1.1rem;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-card);
+		background: var(--color-paper);
+
+		dt {
+			color: var(--color-muted);
+			font-family: var(--font-ui);
+			font-size: .72rem;
+			font-weight: 700;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+		}
+
+		dd {
+			margin: 0;
+			color: var(--color-ink);
+			font-family: var(--font-display);
+			font-size: 2rem;
+			line-height: 1;
+		}
+	}
+
+	&__details {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+		gap: 1rem;
+	}
+
+	&__panel {
+		padding: 1.25rem;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-card);
+		background: var(--color-paper);
+	}
+
+	&__panel-title {
+		margin: 0 0 1rem;
+		font-family: var(--font-ui);
+		font-size: 1rem;
+	}
+
+	&__bars {
+		display: grid;
+		gap: .6rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__bar-row {
+		display: grid;
+		grid-template-columns: 2.5rem 1fr 2rem;
+		align-items: center;
+		gap: .75rem;
+		font-family: var(--font-ui);
+		font-size: .85rem;
+	}
+
+	&__bar-label {
+		color: var(--color-coral);
+		font-weight: 700;
+	}
+
+	&__bar-track {
+		height: .6rem;
+		border-radius: var(--radius-pill);
+		background: var(--color-teal-soft);
+		overflow: hidden;
+	}
+
+	&__bar-fill {
+		display: block;
+		height: 100%;
+		border-radius: var(--radius-pill);
+		background: var(--color-coral);
+	}
+
+	&__bar-count {
+		color: var(--color-copy);
+		text-align: right;
+	}
+
+	&__genre {
+		margin: 0 0 .5rem;
+		color: var(--color-coral);
+		font-family: var(--font-display);
+		font-size: 1.8rem;
+	}
+
+	&__empty {
+		margin: 0;
+		color: var(--color-copy);
+		font-family: var(--font-ui);
+		font-size: .9rem;
+	}
+
+	@media (max-width: 640px) {
+		&__details {
+			grid-template-columns: 1fr;
+		}
+	}
+}
