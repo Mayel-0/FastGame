@@ -84,11 +84,15 @@ Côté frontend, `VITE_API_URL` (dans `frontend/.env`) permet de pointer vers un
 
 - Inscription, connexion par token JWT, modification du profil et de l'avatar
 - Catalogue de jeux avec recherche et filtre par genre
-- Fiche détaillée d'un jeu avec notes et commentaires des joueurs
+- Recommandations personnalisées d'après les jeux aimés
+- Fiche détaillée d'un jeu avec notes et commentaires des joueurs, modifiables et likables
+- Statut par jeu (à faire, en cours, terminé, abandonné) et bibliothèque sur le profil
 - Likes et favoris
 - Listes personnelles, publiques ou privées
 - Page communauté : classements des jeux, membres les plus populaires, listes publiques à liker
-- Abonnements entre joueurs
+- Abonnements entre joueurs et fil d'actualité des joueurs suivis
+- Statistiques du profil : notes, genre préféré, répartition des notes
+- Notifications (nouvel abonné, like sur une liste ou un avis)
 
 ## Tests
 
