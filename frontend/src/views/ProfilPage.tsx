@@ -10,6 +10,8 @@ import CommunityPublicLists from "../components/CommunityPublicLists";
 import usePublicListsByUser from "../hooks/usePublicListsByUser";
 import useLibraryByUser from "../hooks/useLibraryByUser";
 import UserLibrary from "../components/UserLibrary";
+import useUserStats from "../hooks/useUserStats";
+import ProfileStats from "../components/ProfileStats";
 
 function ProfilPage() {
   const { userId: routeUserId } = useParams<{ userId: string }>();
@@ -22,6 +24,7 @@ function ProfilPage() {
   const { data: userLikes, loading: loadingLikes } = useLikeByUser(targetId);
   const { data: userLists, loading: loadingLists } = usePublicListsByUser(targetId);
   const { data: library, loading: loadingLibrary } = useLibraryByUser(targetId);
+  const { data: stats, loading: loadingStats } = useUserStats(targetId);
   const { likes, toggleLike } = useLikeStatus();
 
   const games = (userLikes ?? []).map((like) => ({
@@ -35,7 +38,7 @@ function ProfilPage() {
     url: like.url,
   }));
 
-  const isLoading = loadingUser || loadingLikes || loadingLists || loadingLibrary || (!routeUserId && loadingCurrentUser);
+  const isLoading = loadingUser || loadingLikes || loadingLists || loadingLibrary || loadingStats || (!routeUserId && loadingCurrentUser);
 
   return (
     <PageLoader loading={isLoading}>
@@ -46,6 +49,7 @@ function ProfilPage() {
       ) : !isLoading && user ? (
         <main className="profile-page">
           <UserDetails profil={user} currentUser={currentUser} />
+          {stats && <ProfileStats stats={stats} />}
           <UserLibrary games={library ?? []} />
           <section className="profile-page__games" aria-labelledby="profile-games-title">
             <header className="profile-page__section-header">

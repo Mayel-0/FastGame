@@ -1,13 +1,18 @@
+from collections import Counter
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import and_, distinct, func
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from db.database import get_db
+from models.abonnement import Abonnement as AbonnementModel
+from models.game import GameModel
+from models.likes import LikeModel
 from models.notes import NoteModel
 from models.likes_list import ListeLikeModel
 from models.lists import ListeModel
-from models.users import PublicUserSchema, TopUserSchema, UserModel, UserSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
+from models.users import PublicUserSchema, TopUserSchema, UserModel, UserSchema, UserStatsSchema, UserCreateSchema, UserUpdateSchema, UserLoginSchema, TokenSchema
 from utils.security import (
     hash_password,
     verify_password,
@@ -141,6 +146,58 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
     return user
+
+
+@router.get("/{user_id}/stats", response_model=UserStatsSchema)
+def get_user_stats(user_id: int, db: Session = Depends(get_db)):
+    """Statistiques publiques d'un joueur : notes, likes, listes et genre préféré."""
+    if not db.get(UserModel, user_id):
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    rating_counts = dict(
+        db.query(NoteModel.value, func.count(NoteModel.id))
+        .filter(NoteModel.id_user == user_id)
+        .group_by(NoteModel.value)
+        .all()
+    )
+    ratings_count = sum(rating_counts.values())
+    ratings_total = sum(value * count for value, count in rating_counts.items())
+
+    liked_genres = (
+        db.query(GameModel.genre)
+        .join(LikeModel, LikeModel.game_id == GameModel.id)
+        .filter(LikeModel.user_id == user_id)
+        .all()
+    )
+    rated_genres = (
+        db.query(GameModel.genre)
+        .join(NoteModel, NoteModel.id_game == GameModel.id)
+        .filter(NoteModel.id_user == user_id, NoteModel.value >= 4)
+        .all()
+    )
+    genres = Counter(genre for (genre,) in liked_genres + rated_genres if genre)
+    favorite_genre = min(genres, key=lambda genre: (-genres[genre], genre)) if genres else None
+
+    return {
+        "ratings_count": ratings_count,
+        "average_rating": round(ratings_total / ratings_count, 2) if ratings_count else None,
+        "likes_count": len(liked_genres),
+        "public_lists_count": db.query(func.count(ListeModel.id)).filter(
+            ListeModel.users_id == user_id,
+            ListeModel.public.is_(True),
+        ).scalar() or 0,
+        "followers_count": db.query(func.count(AbonnementModel.id)).filter(
+            AbonnementModel.follow_id == user_id
+        ).scalar() or 0,
+        "following_count": db.query(func.count(AbonnementModel.id)).filter(
+            AbonnementModel.user_id == user_id
+        ).scalar() or 0,
+        "favorite_genre": favorite_genre,
+        "ratings_distribution": [
+            {"value": value, "count": rating_counts.get(value, 0)}
+            for value in range(5, 0, -1)
+        ],
+    }
 
 
 @router.get("/{user_id}/notes")
