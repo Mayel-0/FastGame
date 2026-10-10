@@ -12,6 +12,7 @@ import PageDetailsgame from './views/PageDetailsGame';
 import PageListe from './views/PageListe';
 import CommuPage from './views/CommuPage';
 import AbonnementPage from './views/AbonnementPage';
+import ActivitePage from './views/ActivitePage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Header />
       <Routes>
         <Route path='/abonnements' element={<AbonnementPage/>} />
+        <Route path='/activite' element={<ActivitePage/>} />
         <Route path='/listes' element={<PageListe/>} />
         <Route path='/commu' element={<CommuPage/>} />
         <Route path='/jeux/d/:slug' element={<PageDetailsgame />} />

@@ -22,6 +22,7 @@ from routes.avatar import router as avatar_router, MEDIA_DIR
 from routes.abonnement import router as abonnements_router
 from routes.statuts import router as statuts_router
 from routes.recommandations import router as recommandations_router
+from routes.activite import router as activite_router
 
 
 is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
@@ -82,6 +83,7 @@ app.include_router(avatar_router)
 app.include_router(abonnements_router)
 app.include_router(statuts_router)
 app.include_router(recommandations_router)
+app.include_router(activite_router)
 app.mount("/api/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 @app.get("/")

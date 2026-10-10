@@ -38,6 +38,9 @@ function Header() {
           <li className="header__item"><NavLink className={navLinkClass} to="/">Accueil</NavLink></li>
           <li className="header__item"><NavLink className={navLinkClass} to="/jeux">Jeux</NavLink></li>
           <li className="header__item"><NavLink className={navLinkClass} to="/commu">Communauté</NavLink></li>
+          {isAuthenticated && (
+            <li className="header__item"><NavLink className={navLinkClass} to="/activite">Activité</NavLink></li>
+          )}
         </ul>
       </nav>
       <div className="header__actions">
