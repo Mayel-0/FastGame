@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import useGameDetails from "../hooks/useGameDetails";
 import type Game from "../models/game";
 import PageLoader from "../components/pageLoader";
+import GameStatusSelect from "../components/GameStatusSelect";
+import useStatuts from "../hooks/useStatuts";
 
 function PageDetailsgame() {
   const { slug } = useParams();
@@ -24,6 +26,7 @@ function PageDetailsgame() {
     deleteNote,
     toggleNoteLike,
   } = useGameDetails(slug, initialGame);
+  const { statuts, error: statutError, setStatut } = useStatuts();
 
   if (!game && !loading && !error) {
     return (
@@ -44,6 +47,14 @@ function PageDetailsgame() {
         <main className="details-page">
           <section className="details-page__header">
             <GameDetailsCard game={game} noteAverage={averageNote} notesCount={notes.length} />
+            {isAuthenticated && (
+              <GameStatusSelect
+                gameId={game.id}
+                statut={statuts[game.id] ?? null}
+                error={statutError}
+                onChange={setStatut}
+              />
+            )}
           </section>
 
           <NoteList
