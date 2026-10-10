@@ -2,7 +2,7 @@
 	position: fixed;
 	top: 0;
 	right: 0;
-	z-index: 20;
+	z-index: 60;
 	display: flex;
 	width: min(100%, 24rem);
 	height: 100dvh;
@@ -21,7 +21,7 @@
 	&__overlay {
 		position: fixed;
 		inset: 0;
-		z-index: 19;
+		z-index: 59;
 		background: rgba(0, 0, 0, 0.6);
 		opacity: 0;
 		pointer-events: none;

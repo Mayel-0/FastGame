@@ -30,38 +30,40 @@ function Header() {
     `header__link${isActive ? " is-active" : ""}`;
 
   return (
-    <header className="header">
-      <h1 className="header__brand">
-        <NavLink to="/">FastGame</NavLink>
-      </h1>
-      <nav className="header__navigation" aria-label="Navigation principale">
-        <ul className="header__menu">
-          <li className="header__item"><NavLink className={navLinkClass} to="/">Accueil</NavLink></li>
-          <li className="header__item"><NavLink className={navLinkClass} to="/jeux">Jeux</NavLink></li>
-          <li className="header__item"><NavLink className={navLinkClass} to="/commu">Communauté</NavLink></li>
-          {isAuthenticated && (
-            <li className="header__item"><NavLink className={navLinkClass} to="/activite">Activité</NavLink></li>
+    <>
+      <header className="header">
+        <h1 className="header__brand">
+          <NavLink to="/">FastGame</NavLink>
+        </h1>
+        <nav className="header__navigation" aria-label="Navigation principale">
+          <ul className="header__menu">
+            <li className="header__item"><NavLink className={navLinkClass} to="/">Accueil</NavLink></li>
+            <li className="header__item"><NavLink className={navLinkClass} to="/jeux">Jeux</NavLink></li>
+            <li className="header__item"><NavLink className={navLinkClass} to="/commu">Communauté</NavLink></li>
+            {isAuthenticated && (
+              <li className="header__item"><NavLink className={navLinkClass} to="/activite">Activité</NavLink></li>
+            )}
+          </ul>
+        </nav>
+        <div className="header__actions">
+          {!isAuthenticated ? (
+            <div className="header__action-group">
+              <Link className="header__action" to="/register">s'inscrire</Link>
+              <NavLink className="header__action header__action--primary" to="/login">connexion</NavLink>
+            </div>
+          ) : (
+            <div className="header__action-group">
+              {user && <UserIdentity userId={user.id} username={user.username} imageUrl={user.image_url} />}
+              <NotificationBell />
+              <button className="header__profile-menu" type="button" onClick={() => setIsProfileMenuOpen(true)} aria-label="Ouvrir le menu du profil" aria-expanded={isProfileMenuOpen} aria-controls="profile-drawer">
+                <Menu size={20} aria-hidden="true" />
+              </button>
+            </div>
           )}
-        </ul>
-      </nav>
-      <div className="header__actions">
-        {!isAuthenticated ? (
-          <div className="header__action-group">
-            <Link className="header__action" to="/register">s'inscrire</Link>
-            <NavLink className="header__action header__action--primary" to="/login">connexion</NavLink>
-          </div>
-        ) : (
-          <div className="header__action-group">
-            {user && <UserIdentity userId={user.id} username={user.username} imageUrl={user.image_url} />}
-            <NotificationBell />
-            <button className="header__profile-menu" type="button" onClick={() => setIsProfileMenuOpen(true)} aria-label="Ouvrir le menu du profil" aria-expanded={isProfileMenuOpen} aria-controls="profile-drawer">
-              <Menu size={20} aria-hidden="true" />
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      </header>
       {isAuthenticated && <ProfileDrawer isOpen={isProfileMenuOpen} onClose={() => setIsProfileMenuOpen(false)} />}
-    </header>
+    </>
   );
 }
 
