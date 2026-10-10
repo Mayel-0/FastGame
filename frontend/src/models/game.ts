@@ -31,3 +31,7 @@ export interface GameDetailsPayload {
   notes: Note[];
   user_note: Note | null;
 }
+
+export interface RecommendedGame extends Game {
+  raison: string;
+}
