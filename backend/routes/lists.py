@@ -16,6 +16,7 @@ from models.lists import (
     PublicListDetailOut,
     PublicListOut,
 )
+from models.notifications import NotificationModel
 from models.users import UserModel
 from routes.users import get_current_user
 
@@ -435,6 +436,7 @@ def delete_list(
 
     db.query(ListeItemModel).filter(ListeItemModel.id_list == list_id).delete()
     db.query(ListeLikeModel).filter(ListeLikeModel.liste_id == list_id).delete()
+    db.query(NotificationModel).filter(NotificationModel.liste_id == list_id).delete()
 
     db.delete(user_list)
     db.commit()

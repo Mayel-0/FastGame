@@ -9,6 +9,7 @@ from models.lists import ListeModel
 from models.users import UserModel
 from routes.lists import get_list_like_counts, get_list_previews
 from routes.users import get_current_user
+from utils.notifications import notify
 
 router = APIRouter(
     prefix="/api/lists",
@@ -88,6 +89,7 @@ def like_list(
 
     if not db.get(ListeLikeModel, (current_user.id, list_id)):
         db.add(ListeLikeModel(user_id=current_user.id, liste_id=list_id))
+        notify(db, user_list.users_id, current_user.id, "like_liste", liste_id=list_id)
         try:
             db.commit()
         except IntegrityError:

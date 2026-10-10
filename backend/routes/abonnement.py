@@ -9,6 +9,7 @@ from models.abonnement import (
     AbonnementResponseSchema,
 )
 from routes.users import get_current_user
+from utils.notifications import notify
 
 router = APIRouter(prefix="/api/abonnements", tags=["Abonnements"])
 
@@ -114,6 +115,7 @@ def follow_user(
     )
 
     db.add(new_abonnement)
+    notify(db, target_user.id, current_user.id, "abonnement")
     db.commit()
     db.refresh(new_abonnement)
 

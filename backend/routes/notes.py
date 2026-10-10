@@ -8,8 +8,10 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from models.game import GameModel
 from models.notes import NoteCreateSchema, NoteLikeModel, NoteModel, NoteOut, NoteUpdateSchema, RankedGameOut
+from models.notifications import NotificationModel
 from models.users import UserModel
 from routes.users import get_current_user, get_optional_current_user
+from utils.notifications import notify
 
 router = APIRouter(
     prefix="/api/notes",
@@ -303,6 +305,7 @@ def remove_note(
     note = _get_owned_note(db, note_id, current_user.id, "supprimer")
 
     db.query(NoteLikeModel).filter(NoteLikeModel.note_id == note_id).delete()
+    db.query(NotificationModel).filter(NotificationModel.note_id == note_id).delete()
     db.delete(note)
     db.commit()
     return None
@@ -324,6 +327,7 @@ def like_note(
 
     if not db.get(NoteLikeModel, (current_user.id, note_id)):
         db.add(NoteLikeModel(user_id=current_user.id, note_id=note_id))
+        notify(db, note.id_user, current_user.id, "like_note", note_id=note_id)
         try:
             db.commit()
         except IntegrityError:
